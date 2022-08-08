@@ -24,16 +24,8 @@ OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE
 SOFTWARE.
 */
 
-import static org.junit.Assert.assertEquals;
-import static org.junit.Assert.assertFalse;
-import static org.junit.Assert.assertNotEquals;
-import static org.junit.Assert.assertNotNull;
-import static org.junit.Assert.assertNull;
-import static org.junit.Assert.assertTrue;
-import static org.junit.Assert.fail;
-import static org.mockito.Mockito.mock;
-import static org.mockito.Mockito.when;
-
+import com.jayway.jsonpath.Configuration;
+import com.jayway.jsonpath.JsonPath;
 import java.io.IOException;
 import java.io.InputStream;
 import java.io.Reader;
@@ -51,7 +43,6 @@ import java.util.Locale;
 import java.util.Map;
 import java.util.concurrent.atomic.AtomicInteger;
 import java.util.regex.Pattern;
-
 import org.json.CDL;
 import org.json.JSONArray;
 import org.json.JSONException;
@@ -79,10 +70,16 @@ import org.json.junit.data.RecursiveBeanEquals;
 import org.json.junit.data.Singleton;
 import org.json.junit.data.SingletonEnum;
 import org.json.junit.data.WeirdList;
+import static org.junit.Assert.assertEquals;
+import static org.junit.Assert.assertFalse;
+import static org.junit.Assert.assertNotEquals;
+import static org.junit.Assert.assertNotNull;
+import static org.junit.Assert.assertNull;
+import static org.junit.Assert.assertTrue;
+import static org.junit.Assert.fail;
 import org.junit.Test;
-
-import com.jayway.jsonpath.Configuration;
-import com.jayway.jsonpath.JsonPath;
+import static org.mockito.Mockito.mock;
+import static org.mockito.Mockito.when;
 
 /**
  * JSONObject, along with JSONArray, are the central classes of the reference app.
@@ -906,7 +903,7 @@ public class JSONObjectTest {
         assertTrue("opt longKey should be long", 
                 jsonObject.optLong("longKey") == 1234567890123456789L);
         assertTrue("opt longKey with default should be long", 
-                jsonObject.optLong("longKey", 0) == 1234567890123456789L);
+                jsonObject.optLong("longKey", 0L) == 1234567890123456789L);
         assertTrue("longStrKey should be long", 
                 jsonObject.getLong("longStrKey") == 987654321098765432L);
         assertTrue("optNumber int should return Integer",
@@ -2477,7 +2474,7 @@ public class JSONObjectTest {
         assertTrue("unexpected optBoolean value",jo.optBoolean("true",false)==true);
         assertTrue("unexpected optBoolean value",jo.optBoolean("false",true)==false);
         assertTrue("unexpected optInt value",jo.optInt("int",0)==123);
-        assertTrue("unexpected optLong value",jo.optLong("int",0)==123l);
+        assertTrue("unexpected optLong value",jo.optLong("int",0L)==123l);
         assertTrue("unexpected optDouble value",jo.optDouble("int",0.0d)==123.0d);
         assertTrue("unexpected optFloat value",jo.optFloat("int",0.0f)==123.0f);
         assertTrue("unexpected optBigInteger value",jo.optBigInteger("int",BigInteger.ZERO).compareTo(new BigInteger("123"))==0);
@@ -2500,22 +2497,22 @@ public class JSONObjectTest {
         assertEquals(new BigInteger("19007199254740993"), jo.optBigInteger("largeNumber",null));
         assertEquals(1.9007199254740992E16, jo.optDouble("largeNumber"),0.0);
         assertEquals(1.90071995E16f, jo.optFloat("largeNumber"),0.0f);
-        assertEquals(19007199254740993l, jo.optLong("largeNumber"));
-        assertEquals(1874919425, jo.optInt("largeNumber"));
+        assertEquals(19007199254740993l, (long)jo.optLong("largeNumber"));
+        assertEquals(1874919425, (int)jo.optInt("largeNumber"));
 
         // conversion from a string
         assertEquals(new BigDecimal("19007199254740993.35481234487103587486413587843213584"), jo.optBigDecimal("largeNumberStr",null));
         assertEquals(new BigInteger("19007199254740993"), jo.optBigInteger("largeNumberStr",null));
         assertEquals(1.9007199254740992E16, jo.optDouble("largeNumberStr"),0.0);
         assertEquals(1.90071995E16f, jo.optFloat("largeNumberStr"),0.0f);
-        assertEquals(19007199254740993l, jo.optLong("largeNumberStr"));
-        assertEquals(1874919425, jo.optInt("largeNumberStr"));
+        assertEquals(19007199254740993l, (long)jo.optLong("largeNumberStr"));
+        assertEquals(1874919425, (int)jo.optInt("largeNumberStr"));
 
         // the integer portion of the actual value is larger than a double can hold.
-        assertNotEquals((long)Double.parseDouble("19007199254740993.35481234487103587486413587843213584"), jo.optLong("largeNumber"));
-        assertNotEquals((int)Double.parseDouble("19007199254740993.35481234487103587486413587843213584"), jo.optInt("largeNumber"));
-        assertNotEquals((long)Double.parseDouble("19007199254740993.35481234487103587486413587843213584"), jo.optLong("largeNumberStr"));
-        assertNotEquals((int)Double.parseDouble("19007199254740993.35481234487103587486413587843213584"), jo.optInt("largeNumberStr"));
+        assertNotEquals((long)Double.parseDouble("19007199254740993.35481234487103587486413587843213584"), (long)jo.optLong("largeNumber"));
+        assertNotEquals((int)Double.parseDouble("19007199254740993.35481234487103587486413587843213584"), (int)jo.optInt("largeNumber"));
+        assertNotEquals((long)Double.parseDouble("19007199254740993.35481234487103587486413587843213584"), (long)jo.optLong("largeNumberStr"));
+        assertNotEquals((int)Double.parseDouble("19007199254740993.35481234487103587486413587843213584"), (int)jo.optInt("largeNumberStr"));
         assertEquals(19007199254740992l, (long)Double.parseDouble("19007199254740993.35481234487103587486413587843213584"));
         assertEquals(2147483647, (int)Double.parseDouble("19007199254740993.35481234487103587486413587843213584"));
     }

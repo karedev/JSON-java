@@ -24,23 +24,20 @@ OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE
 SOFTWARE.
 */
 
-import static org.junit.Assert.assertEquals;
-import static org.junit.Assert.assertNull;
-import static org.junit.Assert.assertTrue;
-
+import com.jayway.jsonpath.Configuration;
+import com.jayway.jsonpath.JsonPath;
 import java.util.EnumSet;
 import java.util.List;
 import java.util.Map;
-
 import org.json.JSONArray;
 import org.json.JSONObject;
 import org.json.junit.data.MyEnum;
 import org.json.junit.data.MyEnumClass;
 import org.json.junit.data.MyEnumField;
+import static org.junit.Assert.assertEquals;
+import static org.junit.Assert.assertNull;
+import static org.junit.Assert.assertTrue;
 import org.junit.Test;
-
-import com.jayway.jsonpath.Configuration;
-import com.jayway.jsonpath.JsonPath;
 
 /**
  * Enums are not explicitly supported in JSON-Java. But because enums act like
@@ -406,7 +403,7 @@ public class EnumTest {
         /**
          * Exercise the proposed enum API methods on JSONArray
          */
-        JSONArray jsonArray = new JSONArray();
+        JSONArray<Object> jsonArray = new JSONArray();
         jsonArray.put("value");
         jsonArray.put(myEnumField);
         jsonArray.put(myEnumClass);
