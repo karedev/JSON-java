@@ -35,6 +35,7 @@ import java.util.Collection;
 import java.util.Iterator;
 import java.util.List;
 import java.util.Map;
+import java.util.stream.Stream;
 
 
 /**
@@ -81,18 +82,18 @@ import java.util.Map;
  * @author JSON.org
  * @version 2016-08/15
  */
-public class JSONArray implements Iterable<Object> {
+public class JSONArray<T> implements Iterable<T>, JSONAware {
 
     /**
      * The arrayList where the JSONArray's properties are kept.
      */
-    private final ArrayList<Object> myArrayList;
+    private final ArrayList<T> myArrayList;
 
     /**
      * Construct an empty JSONArray.
      */
     public JSONArray() {
-        this.myArrayList = new ArrayList<Object>();
+        this.myArrayList = new ArrayList<>();
     }
 
     /**
@@ -119,10 +120,10 @@ public class JSONArray implements Iterable<Object> {
             for (;;) {
                 if (x.nextClean() == ',') {
                     x.back();
-                    this.myArrayList.add(JSONObject.NULL);
+                    this.myArrayList.add(null);
                 } else {
                     x.back();
-                    this.myArrayList.add(x.nextValue());
+                    this.myArrayList.add((T)x.nextValue());
                 }
                 switch (x.nextClean()) {
                 case 0:
@@ -170,9 +171,9 @@ public class JSONArray implements Iterable<Object> {
      */
     public JSONArray(Collection<?> collection) {
         if (collection == null) {
-            this.myArrayList = new ArrayList<Object>();
+            this.myArrayList = new ArrayList<>();
         } else {
-            this.myArrayList = new ArrayList<Object>(collection.size());
+            this.myArrayList = new ArrayList<T>(collection.size());
             this.addAll(collection, true);
         }
     }
@@ -199,11 +200,11 @@ public class JSONArray implements Iterable<Object> {
      */
     public JSONArray(JSONArray array) {
         if (array == null) {
-            this.myArrayList = new ArrayList<Object>();
+            this.myArrayList = new ArrayList<>();
         } else {
             // shallow copy directly the internal array lists as any wrapping
             // should have been done already in the original JSONArray
-            this.myArrayList = new ArrayList<Object>(array.myArrayList);
+            this.myArrayList = new ArrayList<>(array.myArrayList);
         }
     }
 
@@ -241,11 +242,11 @@ public class JSONArray implements Iterable<Object> {
             throw new JSONException(
                     "JSONArray initial capacity cannot be negative.");
     	}
-    	this.myArrayList = new ArrayList<Object>(initialCapacity);
+    	this.myArrayList = new ArrayList<>(initialCapacity);
     }
 
     @Override
-    public Iterator<Object> iterator() {
+    public Iterator<T> iterator() {
         return this.myArrayList.iterator();
     }
 
@@ -583,8 +584,9 @@ public class JSONArray implements Iterable<Object> {
      * @return An object value, or null if there is no object at that index.
      */
     public Object opt(int index) {
-        return (index < 0 || index >= this.length()) ? null : this.myArrayList
-                .get(index);
+        return (index < 0 || index >= this.length()) ? null : 
+                this.myArrayList.get(index) == null ?
+                JSONObject.NULL : this.myArrayList.get(index);
     }
 
     /**
@@ -1042,7 +1044,7 @@ public class JSONArray implements Iterable<Object> {
      */
     public JSONArray put(Object value) {
         JSONObject.testValidity(value);
-        this.myArrayList.add(value);
+        this.myArrayList.add((T)value);
         return this;
     }
 
@@ -1189,7 +1191,7 @@ public class JSONArray implements Iterable<Object> {
         }
         if (index < this.length()) {
             JSONObject.testValidity(value);
-            this.myArrayList.set(index, value);
+            this.myArrayList.set(index, (T)value);
             return this;
         }
         if(index == this.length()){
@@ -1201,7 +1203,7 @@ public class JSONArray implements Iterable<Object> {
         this.myArrayList.ensureCapacity(index + 1);
         while (index != this.length()) {
             // we don't need to test validity of NULL objects
-            this.myArrayList.add(JSONObject.NULL);
+            this.myArrayList.add(null);
         }
         return this.put(value);
     }
@@ -1570,7 +1572,7 @@ public class JSONArray implements Iterable<Object> {
      * @return a java.util.List containing the elements of this array
      */
     public List<Object> toList() {
-        List<Object> results = new ArrayList<Object>(this.myArrayList.size());
+        List<Object> results = new ArrayList<>(this.myArrayList.size());
         for (Object element : this.myArrayList) {
             if (element == null || JSONObject.NULL.equals(element)) {
                 results.add(null);
@@ -1681,6 +1683,21 @@ public class JSONArray implements Iterable<Object> {
                     "JSONArray initial value should be a string or collection or array.");
         }
     }
+    
+    /**
+     * Creates a stream from the underlying
+     * map instance of this object.
+     * 
+     * @return Stream
+     */
+    public Stream<T> stream() {
+        return myArrayList.stream();
+    }
+    
+    @Override
+    public String toJSONString() {
+        return toString();
+    }    
     
     /**
      * Create a new JSONException in a common format for incorrect conversions.
