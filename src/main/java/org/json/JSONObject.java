@@ -1456,7 +1456,7 @@ public class JSONObject implements JSONAware {
      */
     public Number optNumber(String key, Number defaultValue) {
         Object val = this.opt(key);
-        if (NULL.equals(val)) {
+        if (NULL.equals(val) || val == null) {
             return defaultValue;
         }
         if (val instanceof Number){
@@ -1471,7 +1471,7 @@ public class JSONObject implements JSONAware {
     }
 
     /**
-     * Get an optional string associated with a key. It returns an empty string
+     * Get an optional string associated with a key. It returns <code>null</code>
      * if there is no such key. If the value is not a string and is not null,
      * then it is converted to a string.
      *
@@ -1480,7 +1480,7 @@ public class JSONObject implements JSONAware {
      * @return A string which is the value.
      */
     public String optString(String key) {
-        return this.optString(key, "");
+        return this.optString(key, null);
     }
 
     /**
