@@ -2702,8 +2702,8 @@ public class JSONObject implements JSONAware {
      * Removes the value with the given key from this object and returns itself.
      * No action taken if the key does not exist.
      *
-     * @param key
-     * @return
+     * @param key The key
+     * @return This instance
      */
     public JSONObject strip(String key) {
         remove(key);
