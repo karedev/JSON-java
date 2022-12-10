@@ -1262,8 +1262,8 @@ public class JSONObject implements JSONAware {
      *            A string which is the key.
      * @return An object which is the value.
      */
-    public double optDouble(String key) {
-        return this.optDouble(key, Double.NaN);
+    public Double optDouble(String key) {
+        return this.optDouble(key, null);
     }
 
     /**
@@ -1277,7 +1277,7 @@ public class JSONObject implements JSONAware {
      *            The default.
      * @return An object which is the value.
      */
-    public double optDouble(String key, double defaultValue) {
+    public Double optDouble(String key, Double defaultValue) {
         Number val = this.optNumber(key);
         if (val == null) {
             return defaultValue;
