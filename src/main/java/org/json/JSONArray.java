@@ -1209,6 +1209,32 @@ public class JSONArray<T> implements Iterable<T>, JSONAware {
     }
 
     /**
+     * Put or insert an object value in the JSONArray. If the index is greater
+     * than the length of the JSONArray, then null elements will be added as
+     * necessary to pad it out.
+     *
+     * @param index
+     *            The subscript.
+     * @param value
+     *            The value to put into the array. The value should be a
+     *            Boolean, Double, Integer, JSONArray, JSONObject, Long, or
+     *            String, or the JSONObject.NULL object.
+     * @return this.
+     * @throws JSONException
+     *             If the index is negative or if the value is an invalid
+     *             number.
+     */
+    public JSONArray add(int index, Object value) throws JSONException {
+        if (index >= 0 && index < this.length()) {
+            JSONObject.testValidity(value);
+            this.myArrayList.add(index, (T)value);
+            return this;
+        }
+        
+        return this.put(index, value);
+    }
+
+    /**
      * Put a collection's elements in to the JSONArray.
      *
      * @param collection
