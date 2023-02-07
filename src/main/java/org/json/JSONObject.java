@@ -1092,8 +1092,8 @@ public class JSONObject implements JSONAware {
      *            A key string.
      * @return The truth.
      */
-    public boolean optBoolean(String key) {
-        return this.optBoolean(key, false);
+    public Boolean optBoolean(String key) {
+        return this.optBoolean(key, null);
     }
 
     /**
@@ -1107,7 +1107,7 @@ public class JSONObject implements JSONAware {
      *            The default.
      * @return The truth.
      */
-    public boolean optBoolean(String key, boolean defaultValue) {
+    public Boolean optBoolean(String key, Boolean defaultValue) {
         Object val = this.opt(key);
         if (NULL.equals(val)) {
             return defaultValue;
