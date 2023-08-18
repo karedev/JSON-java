@@ -20,7 +20,7 @@ public class XMLParserConfiguration extends ParserConfiguration {
     /**
      * The default maximum nesting depth when parsing a XML document to JSON.
      */
-//    public static final int DEFAULT_MAXIMUM_NESTING_DEPTH = 512; // We could override
+    public static final int DEFAULT_MAXIMUM_NESTING_DEPTH = 512; // We could override
 
     /** Original Configuration of the XML Parser. */
     public static final XMLParserConfiguration ORIGINAL
