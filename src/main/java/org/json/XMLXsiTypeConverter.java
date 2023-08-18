@@ -62,5 +62,10 @@ SOFTWARE.
  * @param <T> return type of convert method
  */
 public interface XMLXsiTypeConverter<T> {
+    /**
+     * 
+     * @param value Value
+     * @return Converted value
+     */
     T convert(String value);
 }

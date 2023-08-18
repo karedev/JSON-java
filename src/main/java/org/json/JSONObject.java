@@ -2008,6 +2008,13 @@ public class JSONObject implements JSONAware {
         }
     }
 
+    /**
+     * 
+     * @param string A String
+     * @param w Writer
+     * @return Quoted string
+     * @throws IOException IOException
+     */
     public static Writer quote(String string, Writer w) throws IOException {
         if (string == null || string.isEmpty()) {
             w.write("\"\"");
