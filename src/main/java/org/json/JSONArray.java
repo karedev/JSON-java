@@ -1,27 +1,7 @@
 package org.json;
 
 /*
- Copyright (c) 2002 JSON.org
-
- Permission is hereby granted, free of charge, to any person obtaining a copy
- of this software and associated documentation files (the "Software"), to deal
- in the Software without restriction, including without limitation the rights
- to use, copy, modify, merge, publish, distribute, sublicense, and/or sell
- copies of the Software, and to permit persons to whom the Software is
- furnished to do so, subject to the following conditions:
-
- The above copyright notice and this permission notice shall be included in all
- copies or substantial portions of the Software.
-
- The Software shall be used for Good, not Evil.
-
- THE SOFTWARE IS PROVIDED "AS IS", WITHOUT WARRANTY OF ANY KIND, EXPRESS OR
- IMPLIED, INCLUDING BUT NOT LIMITED TO THE WARRANTIES OF MERCHANTABILITY,
- FITNESS FOR A PARTICULAR PURPOSE AND NONINFRINGEMENT. IN NO EVENT SHALL THE
- AUTHORS OR COPYRIGHT HOLDERS BE LIABLE FOR ANY CLAIM, DAMAGES OR OTHER
- LIABILITY, WHETHER IN AN ACTION OF CONTRACT, TORT OR OTHERWISE, ARISING FROM,
- OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE
- SOFTWARE.
+Public Domain.
  */
 
 import java.io.IOException;
@@ -622,6 +602,38 @@ public class JSONArray<T> implements Iterable<T>, JSONAware {
     }
 
     /**
+     * Get the optional Boolean object associated with an index. It returns false
+     * if there is no value at that index, or if the value is not Boolean.TRUE
+     * or the String "true".
+     *
+     * @param index
+     *            The index must be between 0 and length() - 1.
+     * @return The truth.
+     */
+    public Boolean optBooleanObject(int index) {
+        return this.optBooleanObject(index, false);
+    }
+
+    /**
+     * Get the optional Boolean object associated with an index. It returns the
+     * defaultValue if there is no value at that index or if it is not a Boolean
+     * or the String "true" or "false" (case insensitive).
+     *
+     * @param index
+     *            The index must be between 0 and length() - 1.
+     * @param defaultValue
+     *            A boolean default.
+     * @return The truth.
+     */
+    public Boolean optBooleanObject(int index, Boolean defaultValue) {
+        try {
+            return this.getBoolean(index);
+        } catch (Exception e) {
+            return defaultValue;
+        }
+    }
+
+    /**
      * Get the optional double value associated with an index. NaN is returned
      * if there is no value for the index, or if the value is not a number and
      * cannot be converted to a number.
@@ -651,6 +663,42 @@ public class JSONArray<T> implements Iterable<T>, JSONAware {
             return defaultValue;
         }
         final double doubleValue = val.doubleValue();
+        // if (Double.isNaN(doubleValue) || Double.isInfinite(doubleValue)) {
+        // return defaultValue;
+        // }
+        return doubleValue;
+    }
+
+    /**
+     * Get the optional Double object associated with an index. NaN is returned
+     * if there is no value for the index, or if the value is not a number and
+     * cannot be converted to a number.
+     *
+     * @param index
+     *            The index must be between 0 and length() - 1.
+     * @return The object.
+     */
+    public Double optDoubleObject(int index) {
+        return this.optDoubleObject(index, Double.NaN);
+    }
+
+    /**
+     * Get the optional double value associated with an index. The defaultValue
+     * is returned if there is no value for the index, or if the value is not a
+     * number and cannot be converted to a number.
+     *
+     * @param index
+     *            subscript
+     * @param defaultValue
+     *            The default object.
+     * @return The object.
+     */
+    public Double optDoubleObject(int index, Double defaultValue) {
+        final Number val = this.optNumber(index, null);
+        if (val == null) {
+            return defaultValue;
+        }
+        final Double doubleValue = val.doubleValue();
         // if (Double.isNaN(doubleValue) || Double.isInfinite(doubleValue)) {
         // return defaultValue;
         // }
@@ -694,6 +742,42 @@ public class JSONArray<T> implements Iterable<T>, JSONAware {
     }
 
     /**
+     * Get the optional Float object associated with an index. NaN is returned
+     * if there is no value for the index, or if the value is not a number and
+     * cannot be converted to a number.
+     *
+     * @param index
+     *            The index must be between 0 and length() - 1.
+     * @return The object.
+     */
+    public Float optFloatObject(int index) {
+        return this.optFloatObject(index, Float.NaN);
+    }
+
+    /**
+     * Get the optional Float object associated with an index. The defaultValue
+     * is returned if there is no value for the index, or if the value is not a
+     * number and cannot be converted to a number.
+     *
+     * @param index
+     *            subscript
+     * @param defaultValue
+     *            The default object.
+     * @return The object.
+     */
+    public Float optFloatObject(int index, Float defaultValue) {
+        final Number val = this.optNumber(index, null);
+        if (val == null) {
+            return defaultValue;
+        }
+        final Float floatValue = val.floatValue();
+        // if (Float.isNaN(floatValue) || Float.isInfinite(floatValue)) {
+        // return floatValue;
+        // }
+        return floatValue;
+    }
+
+    /**
      * Get the optional int value associated with an index. Zero is returned if
      * there is no value for the index, or if the value is not a number and
      * cannot be converted to a number.
@@ -718,6 +802,38 @@ public class JSONArray<T> implements Iterable<T>, JSONAware {
      * @return The value.
      */
     public int optInt(int index, int defaultValue) {
+        final Number val = this.optNumber(index, null);
+        if (val == null) {
+            return defaultValue;
+        }
+        return val.intValue();
+    }
+
+    /**
+     * Get the optional Integer object associated with an index. Zero is returned if
+     * there is no value for the index, or if the value is not a number and
+     * cannot be converted to a number.
+     *
+     * @param index
+     *            The index must be between 0 and length() - 1.
+     * @return The object.
+     */
+    public Integer optIntegerObject(int index) {
+        return this.optIntegerObject(index, 0);
+    }
+
+    /**
+     * Get the optional Integer object associated with an index. The defaultValue is
+     * returned if there is no value for the index, or if the value is not a
+     * number and cannot be converted to a number.
+     *
+     * @param index
+     *            The index must be between 0 and length() - 1.
+     * @param defaultValue
+     *            The default object.
+     * @return The object.
+     */
+    public Integer optIntegerObject(int index, Integer defaultValue) {
         final Number val = this.optNumber(index, null);
         if (val == null) {
             return defaultValue;
@@ -861,6 +977,38 @@ public class JSONArray<T> implements Iterable<T>, JSONAware {
      * @return The value.
      */
     public long optLong(int index, long defaultValue) {
+        final Number val = this.optNumber(index, null);
+        if (val == null) {
+            return defaultValue;
+        }
+        return val.longValue();
+    }
+
+    /**
+     * Get the optional Long object associated with an index. Zero is returned if
+     * there is no value for the index, or if the value is not a number and
+     * cannot be converted to a number.
+     *
+     * @param index
+     *            The index must be between 0 and length() - 1.
+     * @return The object.
+     */
+    public Long optLongObject(int index) {
+        return this.optLongObject(index, 0L);
+    }
+
+    /**
+     * Get the optional Long object associated with an index. The defaultValue is
+     * returned if there is no value for the index, or if the value is not a
+     * number and cannot be converted to a number.
+     *
+     * @param index
+     *            The index must be between 0 and length() - 1.
+     * @param defaultValue
+     *            The default object.
+     * @return The object.
+     */
+    public Long optLongObject(int index, Long defaultValue) {
         final Number val = this.optNumber(index, null);
         if (val == null) {
             return defaultValue;
@@ -1413,6 +1561,10 @@ public class JSONArray<T> implements Iterable<T>, JSONAware {
             } else if (valueThis instanceof Number && valueOther instanceof Number) {
                 if (!JSONObject.isNumberSimilar((Number)valueThis, (Number)valueOther)) {
                 	return false;
+                }
+            } else if (valueThis instanceof JSONString && valueOther instanceof JSONString) {
+                if (!((JSONString) valueThis).toJSONString().equals(((JSONString) valueOther).toJSONString())) {
+                    return false;
                 }
             } else if (!valueThis.equals(valueOther)) {
                 return false;
