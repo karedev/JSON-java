@@ -1,14 +1,12 @@
 package org.json.junit;
 
-import static org.junit.Assert.assertEquals;
-import static org.junit.Assert.assertTrue;
-
 import java.math.BigDecimal;
 import java.math.BigInteger;
 import java.util.Arrays;
 import java.util.Collection;
-
 import org.json.JSONObject;
+import static org.junit.Assert.assertEquals;
+import static org.junit.Assert.assertTrue;
 import org.junit.Before;
 import org.junit.Test;
 import org.junit.runner.RunWith;
@@ -126,7 +124,7 @@ public class JSONObjectNumberTest {
 
     @Test
     public void testOptInt() {
-        assertEquals(value.intValue(), object.optInt("value"));
+        assertEquals(value.intValue(), (int)object.optInt("value", 0));
     }
 
     @Test
@@ -136,7 +134,7 @@ public class JSONObjectNumberTest {
 
     @Test
     public void testOptLong() {
-        assertEquals(value.longValue(), object.optLong("value"));
+        assertEquals(value.longValue(), (long)object.optLong("value", 0L));
     }
 
     @Test
