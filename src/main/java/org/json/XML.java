@@ -54,9 +54,15 @@ public class XML {
     public static final String NULL_ATTR = "xsi:nil";
 
     /**
-     * 
+     * Type attribute
      */
     public static final String TYPE_ATTR = "xsi:type";
+
+    /**
+     * Default constructor
+     */
+    public XML() {
+    }
 
     /**
      * Creates an iterator for navigating Code Points in a string instead of

@@ -59,6 +59,8 @@ import java.util.stream.Stream;
  * <code>null</code>.</li>
  * </ul>
  *
+ * @param <T> The child type
+ * 
  * @author JSON.org
  * @version 2016-08/15
  */

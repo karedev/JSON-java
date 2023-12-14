@@ -146,6 +146,11 @@ public class JSONObject implements JSONAware {
      */
     private final Map<String, Object> map;
 
+    /**
+     * Gets the map type
+     * 
+     * @return The class
+     */
     public Class<? extends Map> getMapType() {
         return map.getClass();
     }
@@ -2188,6 +2193,7 @@ public class JSONObject implements JSONAware {
     }
 
     /**
+     * Quotes the data
      * 
      * @param string A String
      * @param w Writer

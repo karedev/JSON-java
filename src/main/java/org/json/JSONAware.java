@@ -6,6 +6,8 @@ package org.json;
  */
 public interface JSONAware {
 	/**
+         * Gets the JSON string value
+         * 
 	 * @return JSON text
 	 */
 	String toJSONString();

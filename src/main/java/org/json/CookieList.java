@@ -10,6 +10,11 @@ Public Domain.
  * @version 2015-12-09
  */
 public class CookieList {
+    /**
+     * Default constructor
+     */
+    public CookieList() {
+    }
 
     /**
      * Convert a cookie list into a JSONObject. A cookie list is a sequence

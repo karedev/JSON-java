@@ -14,6 +14,12 @@ Public Domain.
  */
 public class JSONML {
     /**
+     * Default constructor
+     */
+    public JSONML() {
+    }
+    
+    /**
      * Parse XML values and store them in a JSONArray.
      * @param x       The XMLTokener containing the source string.
      * @param arrayForm true if array form, false if object form.

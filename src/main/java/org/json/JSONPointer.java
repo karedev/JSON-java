@@ -45,6 +45,12 @@ public class JSONPointer {
         private final List<String> refTokens = new ArrayList<String>();
 
         /**
+         * Default constructor
+         */
+        public Builder() {
+        }
+        
+        /**
          * Creates a {@code JSONPointer} instance using the tokens previously set using the
          * {@link #append(String)} method calls.
          * @return a JSONPointer object
@@ -163,6 +169,7 @@ public class JSONPointer {
     }
 
     /**
+     * The pointer of tokens
      * 
      * @param refTokens Token
      */

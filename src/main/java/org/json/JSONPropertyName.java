@@ -20,6 +20,8 @@ import java.lang.annotation.Target;
 @Target({METHOD})
 public @interface JSONPropertyName {
     /**
+     * The name of the property
+     * 
      * @return The name of the property as to be used in the JSON Object.
      */
     String value();

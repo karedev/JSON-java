@@ -43,6 +43,7 @@ Public Domain.
  */
 public interface XMLXsiTypeConverter<T> {
     /**
+     * Type converter
      * 
      * @param value Value
      * @return Converted value
