@@ -16,7 +16,7 @@ repositories {
 dependencies {
     testImplementation 'junit:junit:4.13.1'
     testImplementation 'com.jayway.jsonpath:json-path:2.1.0'
-    testImplementation 'org.mockito:mockito-core:1.10.19'
+    testImplementation 'org.mockito:mockito-core:3.12.4'
 }
 
 subprojects {
@@ -24,9 +24,8 @@ subprojects {
 }
 
 group = 'org.json'
-version = '20230618'
+version = '20231013'
 description = 'JSON in Java'
-sourceCompatibility = '17'
 
 configurations.all {
 }
@@ -34,6 +33,12 @@ configurations.all {
 java {
     withSourcesJar()
     withJavadocJar()
+
+    // Apply a specific Java toolchain to ease 
+    //working on different environments.
+    toolchain {
+        languageVersion = JavaLanguageVersion.of(21)
+    }
 }
 
 publishing {
