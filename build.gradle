@@ -3,13 +3,7 @@
  */
 apply plugin: 'java'
 apply plugin: 'eclipse'
-// apply plugin: 'jacoco'
 apply plugin: 'maven-publish'
-
-//plugins {
-    // id 'java'
-    //id 'maven-publish'
-// }
 
 repositories {
     mavenLocal()
@@ -30,9 +24,8 @@ subprojects {
 }
 
 group = 'org.json'
-version = 'v20230618-SNAPSHOT'
+version = '20231013'
 description = 'JSON in Java'
-sourceCompatibility = '1.8'
 
 configurations.all {
 }
@@ -40,6 +33,12 @@ configurations.all {
 java {
     withSourcesJar()
     withJavadocJar()
+
+    // Apply a specific Java toolchain to ease 
+    //working on different environments.
+    toolchain {
+        languageVersion = JavaLanguageVersion.of(21)
+    }
 }
 
 publishing {

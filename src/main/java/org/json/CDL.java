@@ -24,6 +24,11 @@ Public Domain.
  * @version 2016-05-01
  */
 public class CDL {
+    /**
+     * Default constructor
+     */
+    public CDL() {
+    }
 
     /**
      * Get the next value. The value can be wrapped in quotes. The value can

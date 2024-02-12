@@ -42,5 +42,11 @@ Public Domain.
  * @param <T> return type of convert method
  */
 public interface XMLXsiTypeConverter<T> {
+    /**
+     * Type converter
+     * 
+     * @param value Value
+     * @return Converted value
+     */
     T convert(String value);
 }

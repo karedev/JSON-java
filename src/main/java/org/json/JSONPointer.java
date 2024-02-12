@@ -1,8 +1,7 @@
 package org.json;
 
-import static java.lang.String.format;
-
 import java.io.UnsupportedEncodingException;
+import static java.lang.String.format;
 import java.net.URLDecoder;
 import java.net.URLEncoder;
 import java.util.ArrayList;
@@ -45,6 +44,12 @@ public class JSONPointer {
         // Segments for the eventual JSONPointer string
         private final List<String> refTokens = new ArrayList<String>();
 
+        /**
+         * Default constructor
+         */
+        public Builder() {
+        }
+        
         /**
          * Creates a {@code JSONPointer} instance using the tokens previously set using the
          * {@link #append(String)} method calls.
@@ -163,6 +168,11 @@ public class JSONPointer {
         //}
     }
 
+    /**
+     * The pointer of tokens
+     * 
+     * @param refTokens Token
+     */
     public JSONPointer(List<String> refTokens) {
         this.refTokens = new ArrayList<String>(refTokens);
     }

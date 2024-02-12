@@ -14,6 +14,11 @@ Public Domain.
  * @version 2015-12-09
  */
 public class Cookie {
+    /**
+     * Default constructor
+     */
+    public Cookie() {
+    }
 
     /**
      * Produce a copy of a string in which the characters '+', '%', '=', ';'

@@ -27,6 +27,7 @@ import java.util.Map.Entry;
 import java.util.ResourceBundle;
 import java.util.Set;
 import java.util.regex.Pattern;
+import java.util.stream.Stream;
 
 import static org.json.NumberConversionUtil.potentialNumber;
 import static org.json.NumberConversionUtil.stringToNumber;
@@ -84,7 +85,7 @@ import static org.json.NumberConversionUtil.stringToNumber;
  * @author JSON.org
  * @version 2016-08-15
  */
-public class JSONObject {
+public class JSONObject implements JSONAware {
     /**
      * JSONObject.NULL is equivalent to the value that JavaScript calls null,
      * whilst Java's null is equivalent to the value that JavaScript calls
@@ -148,6 +149,11 @@ public class JSONObject {
      */
     private final Map<String, Object> map;
 
+    /**
+     * Gets the map type
+     * 
+     * @return The class
+     */
     public Class<? extends Map> getMapType() {
         return map.getClass();
     }
@@ -369,7 +375,6 @@ public class JSONObject {
      * &#64;JSONPropertyIgnore
      * public String getName() { return this.name; }
      * </pre>
-     * <p>
      *
      * @param bean
      *            An object that has getter methods that should be used to make
@@ -1125,8 +1130,8 @@ public class JSONObject {
      *            A key string.
      * @return The truth.
      */
-    public boolean optBoolean(String key) {
-        return this.optBoolean(key, false);
+    public Boolean optBoolean(String key) {
+        return this.optBoolean(key, null);
     }
 
     /**
@@ -1140,7 +1145,7 @@ public class JSONObject {
      *            The default.
      * @return The truth.
      */
-    public boolean optBoolean(String key, boolean defaultValue) {
+    public Boolean optBoolean(String key, Boolean defaultValue) {
         Object val = this.opt(key);
         if (NULL.equals(val)) {
             return defaultValue;
@@ -1334,8 +1339,8 @@ public class JSONObject {
      *            A string which is the key.
      * @return An object which is the value.
      */
-    public double optDouble(String key) {
-        return this.optDouble(key, Double.NaN);
+    public Double optDouble(String key) {
+        return this.optDouble(key, null);
     }
 
     /**
@@ -1349,7 +1354,7 @@ public class JSONObject {
      *            The default.
      * @return An object which is the value.
      */
-    public double optDouble(String key, double defaultValue) {
+    public Double optDouble(String key, Double defaultValue) {
         Number val = this.optNumber(key);
         if (val == null) {
             return defaultValue;
@@ -1470,8 +1475,8 @@ public class JSONObject {
      *            A key string.
      * @return An object which is the value.
      */
-    public int optInt(String key) {
-        return this.optInt(key, 0);
+    public Integer optInt(String key) {
+        return this.optInt(key, null);
     }
 
     /**
@@ -1485,7 +1490,7 @@ public class JSONObject {
      *            The default.
      * @return An object which is the value.
      */
-    public int optInt(String key, int defaultValue) {
+    public Integer optInt(String key, Integer defaultValue) {
         final Number val = this.optNumber(key, null);
         if (val == null) {
             return defaultValue;
@@ -1578,7 +1583,7 @@ public class JSONObject {
     }
 
     /**
-     * Get an optional long value associated with a key, or zero if there is no
+     * Get an optional long value associated with a key, or null if there is no
      * such key or if the value is not a number. If the value is a string, an
      * attempt will be made to evaluate it as a number.
      *
@@ -1586,8 +1591,8 @@ public class JSONObject {
      *            A key string.
      * @return An object which is the value.
      */
-    public long optLong(String key) {
-        return this.optLong(key, 0);
+    public Long optLong(String key) {
+        return this.optLong(key, null);
     }
 
     /**
@@ -1601,7 +1606,7 @@ public class JSONObject {
      *            The default.
      * @return An object which is the value.
      */
-    public long optLong(String key, long defaultValue) {
+    public Long optLong(String key, Long defaultValue) {
         final Number val = this.optNumber(key, null);
         if (val == null) {
             return defaultValue;
@@ -1671,7 +1676,7 @@ public class JSONObject {
      */
     public Number optNumber(String key, Number defaultValue) {
         Object val = this.opt(key);
-        if (NULL.equals(val)) {
+        if (NULL.equals(val) || val == null) {
             return defaultValue;
         }
         if (val instanceof Number){
@@ -1686,7 +1691,7 @@ public class JSONObject {
     }
 
     /**
-     * Get an optional string associated with a key. It returns an empty string
+     * Get an optional string associated with a key. It returns <code>null</code>
      * if there is no such key. If the value is not a string and is not null,
      * then it is converted to a string.
      *
@@ -1695,7 +1700,7 @@ public class JSONObject {
      * @return A string which is the value.
      */
     public String optString(String key) {
-        return this.optString(key, "");
+        return this.optString(key, null);
     }
 
     /**
@@ -2232,6 +2237,14 @@ public class JSONObject {
         }
     }
 
+    /**
+     * Quotes the data
+     * 
+     * @param string A String
+     * @param w Writer
+     * @return Quoted string
+     * @throws IOException IOException
+     */
     public static Writer quote(String string, Writer w) throws IOException {
         if (string == null || string.isEmpty()) {
             w.write("\"\"");
@@ -2843,7 +2856,55 @@ public class JSONObject {
         }
         return results;
     }
+    
+    /**
+     * Creates a stream from the underlying
+     * map instance of this object.
+     * 
+     * @return Stream
+     */
+    public Stream<Entry<String, Object>> stream() {
+        return map.entrySet().stream();
+    }
+    
+    /**
+     * Adds the given map entirely to the
+     * current object.
+     * 
+     * @param map The map
+     */
+    public void putAll(Map<? extends String, ? extends Object> map) {
+        map.entrySet().forEach(entry -> put(entry.getKey(), entry.getValue()));
+    }
 
+    /**
+     * Adds the given JSON object entirely 
+     * to the current object. It does perform
+     * shadow copy.
+     * 
+     * @param json The map
+     */
+    public void putAll(JSONObject json) {
+        json.stream().forEach(entry -> put(entry.getKey(), entry.getValue()));
+    }
+
+    @Override
+    public String toJSONString() {
+        return toString();
+    }
+    
+    /**
+     * Removes the value with the given key from this object and returns itself.
+     * No action taken if the key does not exist.
+     *
+     * @param key The key
+     * @return This instance
+     */
+    public JSONObject strip(String key) {
+        remove(key);
+        return this;
+    }
+    
     /**
      * Create a new JSONException in a common format for incorrect conversions.
      * @param key name of the key

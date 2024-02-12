@@ -525,6 +525,11 @@ public class JSONTokener {
                 this.line + "]";
     }
 
+    /**
+     * Closes the reader object
+     * 
+     * @throws IOException If cannot close
+     */
     public void close() throws IOException {
         if(reader!=null){
             reader.close();

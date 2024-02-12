@@ -29,11 +29,20 @@ public class ParserConfiguration {
      */
     protected int maxNestingDepth;
 
+    /**
+     * Default constructor
+     */
     public ParserConfiguration() {
         this.keepStrings = false;
         this.maxNestingDepth = DEFAULT_MAXIMUM_NESTING_DEPTH;
     }
 
+    /**
+     * Parser configuration
+     * 
+     * @param keepStrings Boolean flag
+     * @param maxNestingDepth maximum depth
+     */
     protected ParserConfiguration(final boolean keepStrings, final int maxNestingDepth) {
         this.keepStrings = keepStrings;
         this.maxNestingDepth = maxNestingDepth;
