@@ -28,10 +28,13 @@ import java.util.Map;
 import org.json.JSONArray;
 import org.json.JSONException;
 import org.json.JSONObject;
+import org.json.JSONParserConfiguration;
 import org.json.JSONPointerException;
 import org.json.JSONString;
 import org.json.JSONTokener;
+import org.json.ParserConfiguration;
 import org.json.junit.data.MyJsonString;
+import org.junit.Ignore;
 import org.junit.Test;
 
 import com.jayway.jsonpath.Configuration;
@@ -118,7 +121,7 @@ public class JSONArrayTest {
      * Expects a JSONException.
      */
     @Test
-    public void emptStr() {
+    public void emptyStr() {
         String str = "";
         try {
             assertNull("Should throw an exception", new JSONArray(str));
@@ -368,16 +371,16 @@ public class JSONArrayTest {
                 "hello".equals(jsonArray.getString(4)));
         // doubles
         assertTrue("Array double",
-                new Double(23.45e-4).equals(jsonArray.getDouble(5)));
+                Double.valueOf(23.45e-4).equals(jsonArray.getDouble(5)));
         assertTrue("Array string double",
-                new Double(23.45).equals(jsonArray.getDouble(6)));
+                Double.valueOf(23.45).equals(jsonArray.getDouble(6)));
         assertTrue("Array double can be float",
-                new Float(23.45e-4f).equals(jsonArray.getFloat(5)));
+                Float.valueOf(23.45e-4f).equals(jsonArray.getFloat(5)));
         // ints
         assertTrue("Array value int",
-                new Integer(42).equals(jsonArray.getInt(7)));
+                Integer.valueOf(42).equals(jsonArray.getInt(7)));
         assertTrue("Array value string int",
-                new Integer(43).equals(jsonArray.getInt(8)));
+                Integer.valueOf(43).equals(jsonArray.getInt(8)));
         // nested objects
         JSONArray nestedJsonArray = jsonArray.getJSONArray(9);
         assertTrue("Array value JSONArray", nestedJsonArray != null);
@@ -385,9 +388,9 @@ public class JSONArrayTest {
         assertTrue("Array value JSONObject", nestedJsonObject != null);
         // longs
         assertTrue("Array value long",
-                new Long(0).equals(jsonArray.getLong(11)));
+                Long.valueOf(0).equals(jsonArray.getLong(11)));
         assertTrue("Array value string long",
-                new Long(-1).equals(jsonArray.getLong(12)));
+                Long.valueOf(-1).equals(jsonArray.getLong(12)));
 
         assertTrue("Array value null", jsonArray.isNull(-1));
         Util.checkJSONArrayMaps(jsonArray);
@@ -458,6 +461,20 @@ public class JSONArrayTest {
                     "JSONArray[5] is not a String (class java.math.BigDecimal : 0.002345).",e.getMessage());
         }
         Util.checkJSONArrayMaps(jsonArray);
+    }
+
+    /**
+     * The JSON parser is permissive of unambiguous unquoted keys and values.
+     * Such JSON text should be allowed, even if it does not strictly conform
+     * to the spec. However, after being parsed, toString() should emit strictly
+     * conforming JSON text.  
+     */
+    @Test
+    public void unquotedText() {
+        String str = "[value1, something!, (parens), foo@bar.com, 23, 23+45]";
+        JSONArray jsonArray = new JSONArray(str);
+        List<Object> expected = Arrays.asList("value1", "something!", "(parens)", "foo@bar.com", 23, "23+45");
+        assertEquals(expected, jsonArray.toList());
     }
 
     /**
@@ -545,11 +562,11 @@ public class JSONArrayTest {
                 Boolean.FALSE.equals(jsonArray.optBooleanObject(-1)));
 
         assertTrue("Array opt double",
-                new Double(23.45e-4).equals(jsonArray.optDouble(5)));
+                Double.valueOf(23.45e-4).equals(jsonArray.optDouble(5)));
         assertTrue("Array opt double default",
-                new Double(1).equals(jsonArray.optDouble(0, 1)));
+                Double.valueOf(1).equals(jsonArray.optDouble(0, 1)));
         assertTrue("Array opt double default implicit",
-           new Double(jsonArray.optDouble(99)).isNaN());
+           Double.valueOf(jsonArray.optDouble(99)).isNaN());
 
         assertTrue("Array opt double object",
                 Double.valueOf(23.45e-4).equals(jsonArray.optDoubleObject(5)));
@@ -559,11 +576,11 @@ public class JSONArrayTest {
                 jsonArray.optDoubleObject(99).isNaN());
 
         assertTrue("Array opt float",
-                new Float(23.45e-4).equals(jsonArray.optFloat(5)));
+                Float.valueOf(Double.valueOf(23.45e-4).floatValue()).equals(jsonArray.optFloat(5)));
         assertTrue("Array opt float default",
-                new Float(1).equals(jsonArray.optFloat(0, 1)));
+                Float.valueOf(1).equals(jsonArray.optFloat(0, 1)));
         assertTrue("Array opt float default implicit",
-           new Float(jsonArray.optFloat(99)).isNaN());
+           Float.valueOf(jsonArray.optFloat(99)).isNaN());
 
         assertTrue("Array opt float object",
                 Float.valueOf(23.45e-4F).equals(jsonArray.optFloatObject(5)));
@@ -575,14 +592,14 @@ public class JSONArrayTest {
         assertTrue("Array opt Number",
                 BigDecimal.valueOf(23.45e-4).equals(jsonArray.optNumber(5)));
         assertTrue("Array opt Number default",
-                new Double(1).equals(jsonArray.optNumber(0, 1d)));
+                Double.valueOf(1).equals(jsonArray.optNumber(0, 1d)));
         assertTrue("Array opt Number default implicit",
-           new Double(jsonArray.optNumber(99,Double.NaN).doubleValue()).isNaN());
+           Double.valueOf(jsonArray.optNumber(99,Double.NaN).doubleValue()).isNaN());
 
         assertTrue("Array opt int",
-                new Integer(42).equals(jsonArray.optInt(7)));
+                Integer.valueOf(42).equals(jsonArray.optInt(7)));
         assertTrue("Array opt int default",
-                new Integer(-1).equals(jsonArray.optInt(0, -1)));
+                Integer.valueOf(-1).equals(jsonArray.optInt(0, -1)));
         assertTrue("Array opt int default implicit",
                 0 == jsonArray.optInt(0));
 
@@ -595,13 +612,17 @@ public class JSONArrayTest {
 
         JSONArray nestedJsonArray = jsonArray.optJSONArray(9);
         assertTrue("Array opt JSONArray", nestedJsonArray != null);
-        assertTrue("Array opt JSONArray default", 
+        assertTrue("Array opt JSONArray null",
                 null == jsonArray.optJSONArray(99));
+        assertTrue("Array opt JSONArray default",
+                "value".equals(jsonArray.optJSONArray(99, new JSONArray("[\"value\"]")).getString(0)));
 
         JSONObject nestedJsonObject = jsonArray.optJSONObject(10);
         assertTrue("Array opt JSONObject", nestedJsonObject != null);
-        assertTrue("Array opt JSONObject default", 
+        assertTrue("Array opt JSONObject null",
                 null == jsonArray.optJSONObject(99));
+        assertTrue("Array opt JSONObject default",
+                "value".equals(jsonArray.optJSONObject(99, new JSONObject("{\"key\":\"value\"}")).getString("key")));
 
         assertTrue("Array opt long",
                 0 == jsonArray.optLong(11));
@@ -1011,12 +1032,12 @@ public class JSONArrayTest {
         assertTrue("Array double [23.45e-4]",
                 new BigDecimal("0.002345").equals(it.next()));
         assertTrue("Array string double",
-                new Double(23.45).equals(Double.parseDouble((String)it.next())));
+                Double.valueOf(23.45).equals(Double.parseDouble((String)it.next())));
 
         assertTrue("Array value int",
-                new Integer(42).equals(it.next()));
+                Integer.valueOf(42).equals(it.next()));
         assertTrue("Array value string int",
-                new Integer(43).equals(Integer.parseInt((String)it.next())));
+                Integer.valueOf(43).equals(Integer.parseInt((String)it.next())));
 
         JSONArray nestedJsonArray = (JSONArray)it.next();
         assertTrue("Array value JSONArray", nestedJsonArray != null);
@@ -1025,9 +1046,9 @@ public class JSONArrayTest {
         assertTrue("Array value JSONObject", nestedJsonObject != null);
 
         assertTrue("Array value long",
-                new Long(0).equals(((Number) it.next()).longValue()));
+                Long.valueOf(0).equals(((Number) it.next()).longValue()));
         assertTrue("Array value string long",
-                new Long(-1).equals(Long.parseLong((String) it.next())));
+                Long.valueOf(-1).equals(Long.parseLong((String) it.next())));
         assertTrue("should be at end of array", !it.hasNext());
         Util.checkJSONArraysMaps(new ArrayList<JSONArray>(Arrays.asList(
                 jsonArray, nestedJsonArray
@@ -1366,14 +1387,15 @@ public class JSONArrayTest {
     /**
     * Tests for stack overflow. See https://github.com/stleary/JSON-java/issues/654
     */
+    @Ignore("This test relies on system constraints and may not always pass. See: https://github.com/stleary/JSON-java/issues/821")
     @Test(expected = JSONException.class)
     public void issue654StackOverflowInputWellFormed() {
         //String input = new String(java.util.Base64.getDecoder().decode(base64Bytes));
-        final InputStream resourceAsStream = JSONObjectTest.class.getClassLoader().getResourceAsStream("Issue654WellFormedArray.json");
+        final InputStream resourceAsStream = JSONArrayTest.class.getClassLoader().getResourceAsStream("Issue654WellFormedArray.json");
         JSONTokener tokener = new JSONTokener(resourceAsStream);
         JSONArray json_input = new JSONArray(tokener);
         assertNotNull(json_input);
-        fail("Excepected Exception.");
+        fail("Excepected Exception due to stack overflow.");
         Util.checkJSONArrayMaps(json_input);
     }
 
@@ -1396,5 +1418,93 @@ public class JSONArrayTest {
                 })
                 .put(2);
         assertFalse(ja1.similar(ja3));
+    }
+
+    @Test(expected = JSONException.class)
+    public void testRecursiveDepth() {
+      HashMap<String, Object> map = new HashMap<>();
+      map.put("t", map);
+      new JSONArray().put(map);
+    }
+
+    @Test(expected = JSONException.class)
+    public void testRecursiveDepthAtPosition() {
+      HashMap<String, Object> map = new HashMap<>();
+      map.put("t", map);
+      new JSONArray().put(0, map);
+    }
+
+    @Test(expected = JSONException.class)
+    public void testRecursiveDepthArray() {
+      ArrayList<Object> array = new ArrayList<>();
+      array.add(array);
+      new JSONArray(array);
+    }
+
+    @Test
+    public void testRecursiveDepthAtPositionDefaultObject() {
+        HashMap<String, Object> map = JSONObjectTest.buildNestedMap(ParserConfiguration.DEFAULT_MAXIMUM_NESTING_DEPTH);
+        new JSONArray().put(0, map);
+    }
+
+    @Test
+    public void testRecursiveDepthAtPosition1000Object() {
+        HashMap<String, Object> map = JSONObjectTest.buildNestedMap(1000);
+        new JSONArray().put(0, map, new JSONParserConfiguration().withMaxNestingDepth(1000));
+    }
+
+    @Test(expected = JSONException.class)
+    public void testRecursiveDepthAtPosition1001Object() {
+        HashMap<String, Object> map = JSONObjectTest.buildNestedMap(1001);
+        new JSONArray().put(0, map);
+    }
+
+    @Test(expected = JSONException.class)
+    public void testRecursiveDepthArrayLimitedMaps() {
+        ArrayList<Object> array = new ArrayList<>();
+        array.add(array);
+        new JSONArray(array);
+    }
+
+    @Test
+    public void testRecursiveDepthArrayForDefaultLevels() {
+        ArrayList<Object> array = buildNestedArray(ParserConfiguration.DEFAULT_MAXIMUM_NESTING_DEPTH);
+        new JSONArray(array, new JSONParserConfiguration());
+    }
+
+    @Test
+    public void testRecursiveDepthArrayFor1000Levels() {
+        try {
+            ArrayList<Object> array = buildNestedArray(1000);
+            JSONParserConfiguration parserConfiguration = new JSONParserConfiguration().withMaxNestingDepth(1000);
+            new JSONArray(array, parserConfiguration);
+        } catch (StackOverflowError e) {
+            String javaVersion = System.getProperty("java.version");
+            if (javaVersion.startsWith("11.")) {
+                System.out.println(
+                        "testRecursiveDepthArrayFor1000Levels() allowing intermittent stackoverflow, Java Version: "
+                                + javaVersion);
+            } else {
+                String errorStr = "testRecursiveDepthArrayFor1000Levels() unexpected stackoverflow, Java Version: "
+                        + javaVersion;
+                System.out.println(errorStr);
+                throw new RuntimeException(errorStr);
+            }
+        }
+    }
+
+    @Test(expected = JSONException.class)
+    public void testRecursiveDepthArrayFor1001Levels() {
+        ArrayList<Object> array = buildNestedArray(1001);
+        new JSONArray(array);
+    }
+
+    public static ArrayList<Object> buildNestedArray(int maxDepth) {
+        if (maxDepth <= 0) {
+            return new ArrayList<>();
+        }
+        ArrayList<Object> nestedArray = new ArrayList<>();
+        nestedArray.add(buildNestedArray(maxDepth - 1));
+        return nestedArray;
     }
 }

@@ -44,6 +44,13 @@ public class XMLParserConfiguration extends ParserConfiguration {
     private boolean convertNilAttributeToNull;
 
     /**
+     * When creating an XML from JSON Object, an empty tag by default will self-close.
+     * If it has to be closed explicitly, with empty content between start and end tag,
+     * this flag is to be turned on.
+     */
+    private boolean closeEmptyTag;
+
+    /**
      * This will allow type conversion for values in XML if xsi:type attribute is defined
      */
     private Map<String, XMLXsiTypeConverter<?>> xsiTypeMap;
@@ -54,9 +61,18 @@ public class XMLParserConfiguration extends ParserConfiguration {
      */
     private Set<String> forceList;
 
+
+    /**
+     * Flag to indicate whether white space should be trimmed when parsing XML.
+     * The default behaviour is to trim white space. When this is set to false, inputting XML
+     * with tags that are the same as the value of cDataTagName is unsupported. It is recommended to set cDataTagName
+     * to a distinct value in this case.
+     */
+    private boolean shouldTrimWhiteSpace;
+
     /**
      * Default parser configuration. Does not keep strings (tries to implicitly convert
-     * values), and the CDATA Tag Name is "content".
+     * values), and the CDATA Tag Name is "content". Trims whitespace.
      */
     public XMLParserConfiguration () {
         super();
@@ -64,6 +80,7 @@ public class XMLParserConfiguration extends ParserConfiguration {
         this.convertNilAttributeToNull = false;
         this.xsiTypeMap = Collections.emptyMap();
         this.forceList = Collections.emptySet();
+        this.shouldTrimWhiteSpace = true;
     }
 
     /**
@@ -142,15 +159,17 @@ public class XMLParserConfiguration extends ParserConfiguration {
      *                   xsi:type="integer" as integer,  xsi:type="string" as string
      * @param forceList  <code>new HashSet<String>()</code> to parse the provided tags' values as arrays
      * @param maxNestingDepth <code>int</code> to limit the nesting depth
+     * @param closeEmptyTag <code>boolean</code> to turn on explicit end tag for tag with empty value
      */
     private XMLParserConfiguration (final boolean keepStrings, final String cDataTagName,
             final boolean convertNilAttributeToNull, final Map<String, XMLXsiTypeConverter<?>> xsiTypeMap, final Set<String> forceList,
-            final int maxNestingDepth) {
+            final int maxNestingDepth, final boolean closeEmptyTag) {
         super(keepStrings, maxNestingDepth);
         this.cDataTagName = cDataTagName;
         this.convertNilAttributeToNull = convertNilAttributeToNull;
         this.xsiTypeMap = Collections.unmodifiableMap(xsiTypeMap);
         this.forceList = Collections.unmodifiableSet(forceList);
+        this.closeEmptyTag = closeEmptyTag;
     }
 
     /**
@@ -163,14 +182,17 @@ public class XMLParserConfiguration extends ParserConfiguration {
         // item, a new map instance should be created and if possible each value in the
         // map should be cloned as well. If the values of the map are known to also
         // be immutable, then a shallow clone of the map is acceptable.
-        return new XMLParserConfiguration(
+        final XMLParserConfiguration config = new XMLParserConfiguration(
                 this.keepStrings,
                 this.cDataTagName,
                 this.convertNilAttributeToNull,
                 this.xsiTypeMap,
                 this.forceList,
-                this.maxNestingDepth
+                this.maxNestingDepth,
+                this.closeEmptyTag
         );
+        config.shouldTrimWhiteSpace = this.shouldTrimWhiteSpace;
+        return config;
     }
 
     /**
@@ -182,6 +204,7 @@ public class XMLParserConfiguration extends ParserConfiguration {
      *
      * @return The existing configuration will not be modified. A new configuration is returned.
      */
+    @SuppressWarnings("unchecked")
     @Override
     public XMLParserConfiguration withKeepStrings(final boolean newVal) {
         return super.withKeepStrings(newVal);
@@ -299,8 +322,40 @@ public class XMLParserConfiguration extends ParserConfiguration {
      * @param maxNestingDepth the maximum nesting depth allowed to the XML parser
      * @return The existing configuration will not be modified. A new configuration is returned.
      */
+    @SuppressWarnings("unchecked")
     @Override
     public XMLParserConfiguration withMaxNestingDepth(int maxNestingDepth) {
         return super.withMaxNestingDepth(maxNestingDepth);
+    }
+
+    /**
+     * To enable explicit end tag with empty value.
+     * @param closeEmptyTag new value for the closeEmptyTag property
+     * @return same instance of configuration with empty tag config updated
+     */
+    public XMLParserConfiguration withCloseEmptyTag(boolean closeEmptyTag){
+        XMLParserConfiguration clonedConfiguration = this.clone();
+        clonedConfiguration.closeEmptyTag = closeEmptyTag;
+        return clonedConfiguration;
+    }
+
+    /**
+     * Sets whether whitespace should be trimmed inside of tags. *NOTE* Do not use this if
+     * you expect your XML tags to have names that are the same as cDataTagName as this is unsupported.
+     * cDataTagName should be set to a distinct value in these cases.
+     * @param shouldTrimWhiteSpace boolean to set trimming on or off. Off is default.
+     * @return same instance of configuration with empty tag config updated
+     */
+    public XMLParserConfiguration withShouldTrimWhitespace(boolean shouldTrimWhiteSpace){
+        XMLParserConfiguration clonedConfiguration = this.clone();
+        clonedConfiguration.shouldTrimWhiteSpace = shouldTrimWhiteSpace;
+        return clonedConfiguration;
+    }
+
+    public boolean isCloseEmptyTag() {
+        return this.closeEmptyTag;
+    }
+    public boolean shouldTrimWhiteSpace() {
+        return this.shouldTrimWhiteSpace;
     }
 }

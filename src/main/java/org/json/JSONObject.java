@@ -29,6 +29,9 @@ import java.util.Set;
 import java.util.regex.Pattern;
 import java.util.stream.Stream;
 
+import static org.json.NumberConversionUtil.potentialNumber;
+import static org.json.NumberConversionUtil.stringToNumber;
+
 /**
  * A JSONObject is an unordered collection of name/value pairs. Its external
  * form is a string wrapped in curly braces with colons between the names and
@@ -214,22 +217,14 @@ public class JSONObject implements JSONAware {
             throw x.syntaxError("A JSONObject text must begin with '{'");
         }
         for (;;) {
-            char prev = x.getPrevious();
             c = x.nextClean();
             switch (c) {
             case 0:
                 throw x.syntaxError("A JSONObject text must end with '}'");
             case '}':
                 return;
-            case '{':
-            case '[':
-                if(prev=='{') {
-                    throw x.syntaxError("A JSON Object can not directly nest another JSON Object or JSON Array.");
-                }
-                // fall through
             default:
-                x.back();
-                key = x.nextValue().toString();
+                key = x.nextSimpleValue(c).toString();
             }
 
             // The key is followed by ':'.
@@ -287,6 +282,30 @@ public class JSONObject implements JSONAware {
      *            If a key in the map is <code>null</code>
      */
     public JSONObject(Map<?, ?> m) {
+      this(m, 0, new JSONParserConfiguration());
+    }
+
+    /**
+     * Construct a JSONObject from a Map with custom json parse configurations.
+     *
+     * @param m
+     *            A map object that can be used to initialize the contents of
+     *            the JSONObject.
+     * @param jsonParserConfiguration
+     *            Variable to pass parser custom configuration for json parsing.
+     */
+    public JSONObject(Map<?, ?> m, JSONParserConfiguration jsonParserConfiguration) {
+        this(m, 0, jsonParserConfiguration);
+    }
+
+    /**
+     * Construct a JSONObject from a map with recursion depth.
+     *
+     */
+    private JSONObject(Map<?, ?> m, int recursionDepth, JSONParserConfiguration jsonParserConfiguration) {
+        if (recursionDepth > jsonParserConfiguration.getMaxNestingDepth()) {
+          throw new JSONException("JSONObject has reached recursion depth limit of " + jsonParserConfiguration.getMaxNestingDepth());
+        }
         if (m == null) {
             this.map = new HashMap<String, Object>();
         } else {
@@ -297,7 +316,8 @@ public class JSONObject implements JSONAware {
         	    }
                 final Object value = e.getValue();
                 if (value != null) {
-                    this.map.put(String.valueOf(e.getKey()), wrap(value));
+                    testValidity(value);
+                    this.map.put(String.valueOf(e.getKey()), wrap(value, recursionDepth + 1, jsonParserConfiguration));
                 }
             }
         }
@@ -359,6 +379,8 @@ public class JSONObject implements JSONAware {
      * @param bean
      *            An object that has getter methods that should be used to make
      *            a JSONObject.
+     * @throws JSONException
+     *            If a getter returned a non-finite number.
      */
     public JSONObject(Object bean) {
         this();
@@ -1517,8 +1539,22 @@ public class JSONObject implements JSONAware {
      * @return A JSONArray which is the value.
      */
     public JSONArray optJSONArray(String key) {
-        Object o = this.opt(key);
-        return o instanceof JSONArray ? (JSONArray) o : null;
+        return this.optJSONArray(key, null);
+    }
+
+    /**
+     * Get an optional JSONArray associated with a key, or the default if there
+     * is no such key, or if its value is not a JSONArray.
+     *
+     * @param key
+     *            A key string.
+     * @param defaultValue
+     *            The default.
+     * @return A JSONArray which is the value.
+     */
+    public JSONArray optJSONArray(String key, JSONArray defaultValue) {
+        Object object = this.opt(key);
+        return object instanceof JSONArray ? (JSONArray) object : defaultValue;
     }
 
     /**
@@ -1690,6 +1726,8 @@ public class JSONObject implements JSONAware {
      *
      * @param bean
      *            the bean
+     * @throws JSONException
+     *            If a getter returned a non-finite number.
      */
     private void populateMap(Object bean) {
         populateMap(bean, Collections.newSetFromMap(new IdentityHashMap<Object, Boolean>()));
@@ -1717,21 +1755,22 @@ public class JSONObject implements JSONAware {
                         final Object result = method.invoke(bean);
                         if (result != null) {
                             // check cyclic dependency and throw error if needed
-                            // the wrap and populateMap combination method is 
+                            // the wrap and populateMap combination method is
                             // itself DFS recursive
                             if (objectsRecord.contains(result)) {
                                 throw recursivelyDefinedObjectException(key);
                             }
-                            
+
                             objectsRecord.add(result);
 
+                            testValidity(result);
                             this.map.put(key, wrap(result, objectsRecord));
 
                             objectsRecord.remove(result);
 
                             // we don't use the result anywhere outside of wrap
                             // if it's a resource we should be sure to close it
-                            // after calling toString 
+                            // after calling toString
                             if (result instanceof Closeable) {
                                 try {
                                     ((Closeable) result).close();
@@ -1831,6 +1870,10 @@ public class JSONObject implements JSONAware {
             }
         }
 
+        //If the superclass is Object, no annotations will be found any more
+        if (c.getSuperclass().equals(Object.class))
+            return null;
+
         try {
             return getAnnotation(
                     c.getSuperclass().getMethod(m.getName(), m.getParameterTypes()),
@@ -1884,6 +1927,10 @@ public class JSONObject implements JSONAware {
                 continue;
             }
         }
+
+        //If the superclass is Object, no annotations will be found any more
+        if (c.getSuperclass().equals(Object.class))
+            return -1;
 
         try {
             int d = getAnnotationDepth(
@@ -2182,13 +2229,11 @@ public class JSONObject implements JSONAware {
     @SuppressWarnings("resource")
     public static String quote(String string) {
         StringWriter sw = new StringWriter();
-        synchronized (sw.getBuffer()) {
-            try {
-                return quote(string, sw).toString();
-            } catch (IOException ignored) {
-                // will never happen - we are writing to a string writer
-                return "";
-            }
+        try {
+            return quote(string, sw).toString();
+        } catch (IOException ignored) {
+            // will never happen - we are writing to a string writer
+            return "";
         }
     }
 
@@ -2384,76 +2429,6 @@ public class JSONObject implements JSONAware {
     }
 
     /**
-     * Converts a string to a number using the narrowest possible type. Possible
-     * returns for this function are BigDecimal, Double, BigInteger, Long, and Integer.
-     * When a Double is returned, it should always be a valid Double and not NaN or +-infinity.
-     *
-     * @param val value to convert
-     * @return Number representation of the value.
-     * @throws NumberFormatException thrown if the value is not a valid number. A public
-     *      caller should catch this and wrap it in a {@link JSONException} if applicable.
-     */
-    protected static Number stringToNumber(final String val) throws NumberFormatException {
-        char initial = val.charAt(0);
-        if ((initial >= '0' && initial <= '9') || initial == '-') {
-            // decimal representation
-            if (isDecimalNotation(val)) {
-                // Use a BigDecimal all the time so we keep the original
-                // representation. BigDecimal doesn't support -0.0, ensure we
-                // keep that by forcing a decimal.
-                try {
-                    BigDecimal bd = new BigDecimal(val);
-                    if(initial == '-' && BigDecimal.ZERO.compareTo(bd)==0) {
-                        return Double.valueOf(-0.0);
-                    }
-                    return bd;
-                } catch (NumberFormatException retryAsDouble) {
-                    // this is to support "Hex Floats" like this: 0x1.0P-1074
-                    try {
-                        Double d = Double.valueOf(val);
-                        if(d.isNaN() || d.isInfinite()) {
-                            throw new NumberFormatException("val ["+val+"] is not a valid number.");
-                        }
-                        return d;
-                    } catch (NumberFormatException ignore) {
-                        throw new NumberFormatException("val ["+val+"] is not a valid number.");
-                    }
-                }
-            }
-            // block items like 00 01 etc. Java number parsers treat these as Octal.
-            if(initial == '0' && val.length() > 1) {
-                char at1 = val.charAt(1);
-                if(at1 >= '0' && at1 <= '9') {
-                    throw new NumberFormatException("val ["+val+"] is not a valid number.");
-                }
-            } else if (initial == '-' && val.length() > 2) {
-                char at1 = val.charAt(1);
-                char at2 = val.charAt(2);
-                if(at1 == '0' && at2 >= '0' && at2 <= '9') {
-                    throw new NumberFormatException("val ["+val+"] is not a valid number.");
-                }
-            }
-            // integer representation.
-            // This will narrow any values to the smallest reasonable Object representation
-            // (Integer, Long, or BigInteger)
-
-            // BigInteger down conversion: We use a similar bitLength compare as
-            // BigInteger#intValueExact uses. Increases GC, but objects hold
-            // only what they need. i.e. Less runtime overhead if the value is
-            // long lived.
-            BigInteger bi = new BigInteger(val);
-            if(bi.bitLength() <= 31){
-                return Integer.valueOf(bi.intValue());
-            }
-            if(bi.bitLength() <= 63){
-                return Long.valueOf(bi.longValue());
-            }
-            return bi;
-        }
-        throw new NumberFormatException("val ["+val+"] is not a valid number.");
-    }
-
-    /**
      * Try to convert a string into a number, boolean, or null. If the string
      * can't be converted, return the string.
      *
@@ -2486,8 +2461,7 @@ public class JSONObject implements JSONAware {
          * produced, then the value will just be a string.
          */
 
-        char initial = string.charAt(0);
-        if ((initial >= '0' && initial <= '9') || initial == '-') {
+        if (potentialNumber(string)) {
             try {
                 return stringToNumber(string);
             } catch (Exception ignore) {
@@ -2495,6 +2469,9 @@ public class JSONObject implements JSONAware {
         }
         return string;
     }
+
+
+
 
     /**
      * Throw an exception if the object is a NaN or infinite number.
@@ -2583,9 +2560,7 @@ public class JSONObject implements JSONAware {
     @SuppressWarnings("resource")
     public String toString(int indentFactor) throws JSONException {
         StringWriter w = new StringWriter();
-        synchronized (w.getBuffer()) {
-            return this.write(w, indentFactor, 0).toString();
-        }
+        return this.write(w, indentFactor, 0).toString();
     }
 
     /**
@@ -2636,7 +2611,31 @@ public class JSONObject implements JSONAware {
         return wrap(object, null);
     }
 
+    /**
+     * Wrap an object, if necessary. If the object is <code>null</code>, return the NULL
+     * object. If it is an array or collection, wrap it in a JSONArray. If it is
+     * a map, wrap it in a JSONObject. If it is a standard property (Double,
+     * String, et al) then it is already wrapped. Otherwise, if it comes from
+     * one of the java packages, turn it into a string. And if it doesn't, try
+     * to wrap it in a JSONObject. If the wrapping fails, then null is returned.
+     *
+     * @param object
+     *            The object to wrap
+     * @param recursionDepth
+     *            Variable for tracking the count of nested object creations.
+     * @param jsonParserConfiguration
+     *            Variable to pass parser custom configuration for json parsing.
+     * @return The wrapped value
+     */
+    static Object wrap(Object object, int recursionDepth, JSONParserConfiguration jsonParserConfiguration) {
+      return wrap(object, null, recursionDepth, jsonParserConfiguration);
+    }
+
     private static Object wrap(Object object, Set<Object> objectsRecord) {
+      return wrap(object, objectsRecord, 0, new JSONParserConfiguration());
+    }
+
+    private static Object wrap(Object object, Set<Object> objectsRecord, int recursionDepth, JSONParserConfiguration jsonParserConfiguration) {
         try {
             if (NULL.equals(object)) {
                 return NULL;
@@ -2654,14 +2653,14 @@ public class JSONObject implements JSONAware {
 
             if (object instanceof Collection) {
                 Collection<?> coll = (Collection<?>) object;
-                return new JSONArray(coll);
+                return new JSONArray(coll, recursionDepth, jsonParserConfiguration);
             }
             if (object.getClass().isArray()) {
                 return new JSONArray(object);
             }
             if (object instanceof Map) {
                 Map<?, ?> map = (Map<?, ?>) object;
-                return new JSONObject(map);
+                return new JSONObject(map, recursionDepth, jsonParserConfiguration);
             }
             Package objectPackage = object.getClass().getPackage();
             String objectPackageName = objectPackage != null ? objectPackage
@@ -2945,4 +2944,6 @@ public class JSONObject implements JSONAware {
             "JavaBean object contains recursively defined member variable of key " + quote(key)
         );
     }
+
+
 }

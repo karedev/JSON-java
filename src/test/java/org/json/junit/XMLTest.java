@@ -791,7 +791,7 @@ public class XMLTest {
     @Test
     public void testToJSONArray_jsonOutput() {
         final String originalXml = "<root><id>01</id><id>1</id><id>00</id><id>0</id><item id=\"01\"/><title>True</title></root>";
-        final JSONObject expectedJson = new JSONObject("{\"root\":{\"item\":{\"id\":\"01\"},\"id\":[\"01\",1,\"00\",0],\"title\":true}}");
+        final JSONObject expectedJson = new JSONObject("{\"root\":{\"item\":{\"id\":1},\"id\":[1,1,0,0],\"title\":true}}");
         final JSONObject actualJsonOutput = XML.toJSONObject(originalXml, false);
 
         Util.compareActualVsExpectedJsonObjects(actualJsonOutput,expectedJson);
@@ -1177,6 +1177,30 @@ public class XMLTest {
 
 
     }
+
+    @Test
+    public void shouldCreateExplicitEndTagWithEmptyValueWhenConfigured(){
+        String jsonString = "{outer:{innerOne:\"\", innerTwo:\"two\"}}";
+        JSONObject jsonObject = new JSONObject(jsonString);
+        String expectedXmlString = "<encloser><outer><innerOne></innerOne><innerTwo>two</innerTwo></outer></encloser>";
+        String xmlForm = XML.toString(jsonObject,"encloser", new XMLParserConfiguration().withCloseEmptyTag(true));
+        JSONObject actualJsonObject = XML.toJSONObject(xmlForm);
+        JSONObject expectedJsonObject = XML.toJSONObject(expectedXmlString);
+        assertTrue(expectedJsonObject.similar(actualJsonObject));
+    }
+
+    @Test
+    public void shouldNotCreateExplicitEndTagWithEmptyValueWhenNotConfigured(){
+        String jsonString = "{outer:{innerOne:\"\", innerTwo:\"two\"}}";
+        JSONObject jsonObject = new JSONObject(jsonString);
+        String expectedXmlString = "<encloser><outer><innerOne/><innerTwo>two</innerTwo></outer></encloser>";
+        String xmlForm = XML.toString(jsonObject,"encloser", new XMLParserConfiguration().withCloseEmptyTag(false));
+        JSONObject actualJsonObject = XML.toJSONObject(xmlForm);
+        JSONObject expectedJsonObject = XML.toJSONObject(expectedXmlString);
+        assertTrue(expectedJsonObject.similar(actualJsonObject));
+    }
+
+
     @Test
     public void testIndentSimpleJsonObject(){
         String str = "{    \"employee\": {  \n" +
@@ -1223,32 +1247,18 @@ public class XMLTest {
 
     @Test
     public void testIndentComplicatedJsonObjectWithArrayAndWithConfig(){
-        try {
-            InputStream jsonStream = null;
-            try {
-                jsonStream = XMLTest.class.getClassLoader().getResourceAsStream("Issue593.json");
-                final JSONObject object = new JSONObject(new JSONTokener(jsonStream));
-                String actualString = XML.toString(object, null, XMLParserConfiguration.KEEP_STRINGS,2);
-                InputStream xmlStream = null;
-                try {
-                    xmlStream = XMLTest.class.getClassLoader().getResourceAsStream("Issue593.xml");
-                    int bufferSize = 1024;
-                    char[] buffer = new char[bufferSize];
-                    StringBuilder expected = new StringBuilder();
-                    Reader in = new InputStreamReader(xmlStream, "UTF-8");
-                    for (int numRead; (numRead = in.read(buffer, 0, buffer.length)) > 0; ) {
-                        expected.append(buffer, 0, numRead);
-                    }
-                    assertEquals(expected.toString(), actualString.replaceAll("\\n|\\r\\n", System.getProperty("line.separator")));
-                } finally {
-                    if (xmlStream != null) {
-                        xmlStream.close();
-                    }
+        try (InputStream jsonStream = XMLTest.class.getClassLoader().getResourceAsStream("Issue593.json")) {
+            final JSONObject object = new JSONObject(new JSONTokener(jsonStream));
+            String actualString = XML.toString(object, null, XMLParserConfiguration.KEEP_STRINGS, 2);
+            try (InputStream xmlStream = XMLTest.class.getClassLoader().getResourceAsStream("Issue593.xml")) {
+                int bufferSize = 1024;
+                char[] buffer = new char[bufferSize];
+                StringBuilder expected = new StringBuilder();
+                Reader in = new InputStreamReader(xmlStream, "UTF-8");
+                for (int numRead; (numRead = in.read(buffer, 0, buffer.length)) > 0; ) {
+                    expected.append(buffer, 0, numRead);
                 }
-            } finally {
-                if (jsonStream != null) {
-                    jsonStream.close();
-                }
+                assertTrue(XML.toJSONObject(expected.toString()).similar(XML.toJSONObject(actualString)));
             }
         } catch (IOException e) {
             fail("file writer error: " +e.getMessage());
@@ -1313,6 +1323,80 @@ public class XMLTest {
                 "parameter of the XMLParserConfiguration used");
         }
     }
+    @Test
+    public void testWithWhitespaceTrimmingDisabled() {
+        String originalXml = "<testXml> Test Whitespace String \t </testXml>";
+
+        JSONObject actualJson = XML.toJSONObject(originalXml, new XMLParserConfiguration().withShouldTrimWhitespace(false));
+        String expectedJsonString = "{\"testXml\":\" Test Whitespace String \t \"}";
+        JSONObject expectedJson = new JSONObject(expectedJsonString);
+        Util.compareActualVsExpectedJsonObjects(actualJson,expectedJson);
+    }
+    @Test
+    public void testNestedWithWhitespaceTrimmingDisabled() {
+        String originalXml =
+                "<?xml version=\"1.0\" encoding=\"UTF-8\"?>\n"+
+                        "<addresses>\n"+
+                        "   <address>\n"+
+                        "      <name> Sherlock Holmes </name>\n"+
+                        "   </address>\n"+
+                        "</addresses>";
+
+        JSONObject actualJson = XML.toJSONObject(originalXml, new XMLParserConfiguration().withShouldTrimWhitespace(false));
+        String expectedJsonString = "{\"addresses\":{\"address\":{\"name\":\" Sherlock Holmes \"}}}";
+        JSONObject expectedJson = new JSONObject(expectedJsonString);
+        Util.compareActualVsExpectedJsonObjects(actualJson,expectedJson);
+    }
+    @Test
+    public void shouldTrimWhitespaceDoesNotSupportTagsEqualingCDataTagName() {
+    // When using withShouldTrimWhitespace = true, input containing tags with same name as cDataTagName is unsupported and should not be used in conjunction
+        String originalXml =
+                "<?xml version=\"1.0\" encoding=\"UTF-8\"?>\n"+
+                        "<addresses>\n"+
+                        "   <address>\n"+
+                        "      <content> Sherlock Holmes </content>\n"+
+                        "   </address>\n"+
+                        "</addresses>";
+
+        JSONObject actualJson = XML.toJSONObject(originalXml, new XMLParserConfiguration().withShouldTrimWhitespace(false).withcDataTagName("content"));
+        String expectedJsonString = "{\"addresses\":{\"address\":[[\"\\n      \",\" Sherlock Holmes \",\"\\n   \"]]}}";
+        JSONObject expectedJson = new JSONObject(expectedJsonString);
+        Util.compareActualVsExpectedJsonObjects(actualJson,expectedJson);
+    }
+    @Test
+    public void shouldTrimWhitespaceEnabledDropsTagsEqualingCDataTagNameButValueRemains() {
+        String originalXml =
+                "<?xml version=\"1.0\" encoding=\"UTF-8\"?>\n"+
+                        "<addresses>\n"+
+                        "   <address>\n"+
+                        "      <content> Sherlock Holmes </content>\n"+
+                        "   </address>\n"+
+                        "</addresses>";
+
+        JSONObject actualJson = XML.toJSONObject(originalXml, new XMLParserConfiguration().withShouldTrimWhitespace(true).withcDataTagName("content"));
+        String expectedJsonString = "{\"addresses\":{\"address\":\"Sherlock Holmes\"}}";
+        JSONObject expectedJson = new JSONObject(expectedJsonString);
+        Util.compareActualVsExpectedJsonObjects(actualJson,expectedJson);
+    }
+    @Test
+    public void testWithWhitespaceTrimmingEnabled() {
+        String originalXml = "<testXml> Test Whitespace String \t </testXml>";
+
+        JSONObject actualJson = XML.toJSONObject(originalXml, new XMLParserConfiguration().withShouldTrimWhitespace(true));
+        String expectedJsonString = "{\"testXml\":\"Test Whitespace String\"}";
+        JSONObject expectedJson = new JSONObject(expectedJsonString);
+        Util.compareActualVsExpectedJsonObjects(actualJson,expectedJson);
+    }
+    @Test
+    public void testWithWhitespaceTrimmingEnabledByDefault() {
+        String originalXml = "<testXml> Test Whitespace String \t </testXml>";
+
+        JSONObject actualJson = XML.toJSONObject(originalXml, new XMLParserConfiguration());
+        String expectedJsonString = "{\"testXml\":\"Test Whitespace String\"}";
+        JSONObject expectedJson = new JSONObject(expectedJsonString);
+        Util.compareActualVsExpectedJsonObjects(actualJson,expectedJson);
+    }
+
 }
 
 

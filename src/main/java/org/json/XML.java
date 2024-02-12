@@ -10,6 +10,9 @@ import java.math.BigDecimal;
 import java.math.BigInteger;
 import java.util.Iterator;
 
+import static org.json.NumberConversionUtil.potentialNumber;
+import static org.json.NumberConversionUtil.stringToNumber;
+
 
 /**
  * This provides static methods to convert an XML text into a JSONObject, and to
@@ -437,6 +440,9 @@ public class XML {
                                             && jsonObject.opt(config.getcDataTagName()) != null) {
                                         context.accumulate(tagName, jsonObject.opt(config.getcDataTagName()));
                                     } else {
+                                        if (!config.shouldTrimWhiteSpace()) {
+                                            removeEmpty(jsonObject, config);
+                                        }
                                         context.accumulate(tagName, jsonObject);
                                     }
                                 }
@@ -451,6 +457,48 @@ public class XML {
             }
         }
     }
+    /**
+     * This method removes any JSON entry which has the key set by XMLParserConfiguration.cDataTagName
+     * and contains whitespace as this is caused by whitespace between tags. See test XMLTest.testNestedWithWhitespaceTrimmingDisabled.
+     * @param jsonObject JSONObject which may require deletion
+     * @param config The XMLParserConfiguration which includes the cDataTagName
+     */
+    private static void removeEmpty(final JSONObject jsonObject, final XMLParserConfiguration config) {
+        if (jsonObject.has(config.getcDataTagName()))  {
+            final Object s = jsonObject.get(config.getcDataTagName());
+            if (s instanceof String) {
+                if (isStringAllWhiteSpace(s.toString())) {
+                    jsonObject.remove(config.getcDataTagName());
+                }
+            }
+            else if (s instanceof JSONArray) {
+                final JSONArray sArray = (JSONArray) s;
+                for (int k = sArray.length()-1; k >= 0; k--){
+                    final Object eachString = sArray.get(k);
+                    if (eachString instanceof String) {
+                        String s1 = (String) eachString;
+                        if (isStringAllWhiteSpace(s1)) {
+                            sArray.remove(k);
+                        }
+                    }
+                }
+                if (sArray.isEmpty()) {
+                    jsonObject.remove(config.getcDataTagName());
+                }
+            }
+        }
+    }
+
+    private static boolean isStringAllWhiteSpace(final String s) {
+        for (int k = 0; k<s.length(); k++){
+            final char eachChar = s.charAt(k);
+            if (!Character.isWhitespace(eachChar)) {
+                return false;
+            }
+        }
+        return true;
+    }
+
 
     /**
      * This method tries to convert the given string value to the target object
@@ -495,8 +543,7 @@ public class XML {
          * produced, then the value will just be a string.
          */
 
-        char initial = string.charAt(0);
-        if ((initial >= '0' && initial <= '9') || initial == '-') {
+        if (potentialNumber(string)) {
             try {
                 return stringToNumber(string);
             } catch (Exception ignore) {
@@ -505,76 +552,9 @@ public class XML {
         return string;
     }
 
-    /**
-     * direct copy of {@link JSONObject#stringToNumber(String)} to maintain Android support.
-     */
-    private static Number stringToNumber(final String val) throws NumberFormatException {
-        char initial = val.charAt(0);
-        if ((initial >= '0' && initial <= '9') || initial == '-') {
-            // decimal representation
-            if (isDecimalNotation(val)) {
-                // Use a BigDecimal all the time so we keep the original
-                // representation. BigDecimal doesn't support -0.0, ensure we
-                // keep that by forcing a decimal.
-                try {
-                    BigDecimal bd = new BigDecimal(val);
-                    if(initial == '-' && BigDecimal.ZERO.compareTo(bd)==0) {
-                        return Double.valueOf(-0.0);
-                    }
-                    return bd;
-                } catch (NumberFormatException retryAsDouble) {
-                    // this is to support "Hex Floats" like this: 0x1.0P-1074
-                    try {
-                        Double d = Double.valueOf(val);
-                        if(d.isNaN() || d.isInfinite()) {
-                            throw new NumberFormatException("val ["+val+"] is not a valid number.");
-                        }
-                        return d;
-                    } catch (NumberFormatException ignore) {
-                        throw new NumberFormatException("val ["+val+"] is not a valid number.");
-                    }
-                }
-            }
-            // block items like 00 01 etc. Java number parsers treat these as Octal.
-            if(initial == '0' && val.length() > 1) {
-                char at1 = val.charAt(1);
-                if(at1 >= '0' && at1 <= '9') {
-                    throw new NumberFormatException("val ["+val+"] is not a valid number.");
-                }
-            } else if (initial == '-' && val.length() > 2) {
-                char at1 = val.charAt(1);
-                char at2 = val.charAt(2);
-                if(at1 == '0' && at2 >= '0' && at2 <= '9') {
-                    throw new NumberFormatException("val ["+val+"] is not a valid number.");
-                }
-            }
-            // integer representation.
-            // This will narrow any values to the smallest reasonable Object representation
-            // (Integer, Long, or BigInteger)
 
-            // BigInteger down conversion: We use a similar bitLength compare as
-            // BigInteger#intValueExact uses. Increases GC, but objects hold
-            // only what they need. i.e. Less runtime overhead if the value is
-            // long lived.
-            BigInteger bi = new BigInteger(val);
-            if(bi.bitLength() <= 31){
-                return Integer.valueOf(bi.intValue());
-            }
-            if(bi.bitLength() <= 63){
-                return Long.valueOf(bi.longValue());
-            }
-            return bi;
-        }
-        throw new NumberFormatException("val ["+val+"] is not a valid number.");
-    }
 
-    /**
-     * direct copy of {@link JSONObject#isDecimalNotation(String)} to maintain Android support.
-     */
-    private static boolean isDecimalNotation(final String val) {
-        return val.indexOf('.') > -1 || val.indexOf('e') > -1
-                || val.indexOf('E') > -1 || "-0".equals(val);
-    }
+
 
 
     /**
@@ -668,7 +648,7 @@ public class XML {
      */
     public static JSONObject toJSONObject(Reader reader, XMLParserConfiguration config) throws JSONException {
         JSONObject jo = new JSONObject();
-        XMLTokener x = new XMLTokener(reader);
+        XMLTokener x = new XMLTokener(reader, config);
         while (x.more()) {
             x.skipPast("<");
             if(x.more()) {
@@ -859,12 +839,25 @@ public class XML {
                         }
                     }
                 } else if ("".equals(value)) {
-                    sb.append(indent(indent));
-                    sb.append('<');
-                    sb.append(key);
-                    sb.append("/>");
-                    if(indentFactor > 0){
-                        sb.append("\n");
+                    if (config.isCloseEmptyTag()){
+                        sb.append(indent(indent));
+                        sb.append('<');
+                        sb.append(key);
+                        sb.append(">");
+                        sb.append("</");
+                        sb.append(key);
+                        sb.append(">");
+                        if (indentFactor > 0) {
+                            sb.append("\n");
+                        }
+                    }else {
+                        sb.append(indent(indent));
+                        sb.append('<');
+                        sb.append(key);
+                        sb.append("/>");
+                        if (indentFactor > 0) {
+                            sb.append("\n");
+                        }
                     }
 
                     // Emit a new tag <k>
@@ -908,14 +901,14 @@ public class XML {
 
 
         string = (object == null) ? "null" : escape(object.toString());
-
+        String indentationSuffix = (indentFactor > 0) ? "\n" : "";
         if(tagName == null){
-            return indent(indent) + "\"" + string + "\"" + ((indentFactor > 0) ? "\n" : "");
+            return indent(indent) + "\"" + string + "\"" + indentationSuffix;
         } else if(string.length() == 0){
-            return indent(indent) + "<" + tagName + "/>" + ((indentFactor > 0) ? "\n" : "");
+            return indent(indent) + "<" + tagName + "/>" + indentationSuffix;
         } else {
             return indent(indent) + "<" + tagName
-                    + ">" + string + "</" + tagName + ">" + ((indentFactor > 0) ? "\n" : "");
+                    + ">" + string + "</" + tagName + ">" + indentationSuffix;
         }
     }
 
@@ -982,4 +975,5 @@ public class XML {
         }
         return sb.toString();
     }
+
 }

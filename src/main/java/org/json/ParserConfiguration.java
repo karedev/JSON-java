@@ -80,9 +80,11 @@ public class ParserConfiguration {
      *
      * @param newVal
      *      new value to use for the <code>keepStrings</code> configuration option.
-     * @param <T> The configuration 
+     * @param <T> the type of the configuration object
+     * 
      * @return The existing configuration will not be modified. A new configuration is returned.
      */
+    @SuppressWarnings("unchecked")
     public <T extends ParserConfiguration> T withKeepStrings(final boolean newVal) {
         T newConfig = (T)this.clone();
         newConfig.keepStrings = newVal;
@@ -105,9 +107,11 @@ public class ParserConfiguration {
      * Using any negative value as a parameter is equivalent to setting no limit to the nesting depth,
      * which means the parses will go as deep as the maximum call stack size allows.
      * @param maxNestingDepth the maximum nesting depth allowed to the XML parser
-     * @param <T> The configuration
+     * @param <T> the type of the configuration object
+     * 
      * @return The existing configuration will not be modified. A new configuration is returned.
      */
+    @SuppressWarnings("unchecked")
     public <T extends ParserConfiguration> T withMaxNestingDepth(int maxNestingDepth) {
         T newConfig = (T)this.clone();
 
