@@ -1,7 +1,7 @@
-package com.kareku.json.junit.data;
+package com.mutfak.json.junit.data;
 
-import com.kareku.json.JSONPropertyIgnore;
-import com.kareku.json.JSONPropertyName;
+import com.mutfak.json.JSONPropertyIgnore;
+import com.mutfak.json.JSONPropertyName;
 
 public interface MyBeanCustomNameInterface {
     @JSONPropertyName("InterfaceField")

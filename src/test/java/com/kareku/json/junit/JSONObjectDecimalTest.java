@@ -1,6 +1,6 @@
-package com.kareku.json.junit;
+package com.mutfak.json.junit;
 
-import com.kareku.json.JSONObject;
+import com.mutfak.json.JSONObject;
 import org.junit.Test;
 
 import java.math.BigDecimal;

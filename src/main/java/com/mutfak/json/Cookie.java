@@ -1,4 +1,4 @@
-package com.kareku.json;
+package com.mutfak.json;
 
 import java.util.Locale;
 

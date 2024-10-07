@@ -1,13 +1,13 @@
-package com.kareku.json.junit;
+package com.mutfak.json.junit;
 
 /*
 Public Domain.
 */
 
-import com.kareku.json.JSONException;
-import com.kareku.json.JSONArray;
-import com.kareku.json.JSONString;
-import com.kareku.json.JSONObject;
+import com.mutfak.json.JSONException;
+import com.mutfak.json.JSONArray;
+import com.mutfak.json.JSONString;
+import com.mutfak.json.JSONObject;
 import static org.junit.Assert.*;
 
 import java.io.StringWriter;

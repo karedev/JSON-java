@@ -1,12 +1,12 @@
-package com.kareku.json.junit;
+package com.mutfak.json.junit;
 
 /*
 Public Domain.
 */
 
-import com.kareku.json.HTTP;
-import com.kareku.json.JSONException;
-import com.kareku.json.JSONObject;
+import com.mutfak.json.HTTP;
+import com.mutfak.json.JSONException;
+import com.mutfak.json.JSONObject;
 import static org.junit.Assert.*;
 
 import org.junit.Test;

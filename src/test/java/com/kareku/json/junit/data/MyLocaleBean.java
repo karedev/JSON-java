@@ -1,4 +1,4 @@
-package com.kareku.json.junit.data;
+package com.mutfak.json.junit.data;
 
 public class MyLocaleBean {
     private final String id = "beanId";
