@@ -1,4 +1,4 @@
-package com.kareku.json.junit;
+package com.mutfak.json.junit;
 
 /*
 Public Domain.
@@ -25,15 +25,15 @@ import java.util.Iterator;
 import java.util.List;
 import java.util.Map;
 
-import com.kareku.json.JSONArray;
-import com.kareku.json.JSONException;
-import com.kareku.json.JSONObject;
-import com.kareku.json.JSONParserConfiguration;
-import com.kareku.json.JSONPointerException;
-import com.kareku.json.JSONString;
-import com.kareku.json.JSONTokener;
-import com.kareku.json.ParserConfiguration;
-import com.kareku.json.junit.data.MyJsonString;
+import com.mutfak.json.JSONArray;
+import com.mutfak.json.JSONException;
+import com.mutfak.json.JSONObject;
+import com.mutfak.json.JSONParserConfiguration;
+import com.mutfak.json.JSONPointerException;
+import com.mutfak.json.JSONString;
+import com.mutfak.json.JSONTokener;
+import com.mutfak.json.ParserConfiguration;
+import com.mutfak.json.junit.data.MyJsonString;
 import org.junit.Ignore;
 import org.junit.Test;
 

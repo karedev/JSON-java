@@ -1,6 +1,6 @@
-package com.kareku.json.junit.data;
+package com.mutfak.json.junit.data;
 
-import com.kareku.json.JSONString;
+import com.mutfak.json.JSONString;
 
 /**
  * Used in testing when a JSONString is needed

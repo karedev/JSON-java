@@ -1,4 +1,4 @@
-package com.kareku.json.junit.data;
+package com.mutfak.json.junit.data;
 
 /**
  * test class for verifying if recursively defined bean can be correctly identified

@@ -1,16 +1,16 @@
-package com.kareku.json.junit;
+package com.mutfak.json.junit;
 
 /*
 Public Domain.
 */
 
-import com.kareku.json.JSONTokener;
-import com.kareku.json.JSONArray;
-import com.kareku.json.JSONException;
-import com.kareku.json.XMLXsiTypeConverter;
-import com.kareku.json.XMLParserConfiguration;
-import com.kareku.json.JSONObject;
-import com.kareku.json.XML;
+import com.mutfak.json.JSONTokener;
+import com.mutfak.json.JSONArray;
+import com.mutfak.json.JSONException;
+import com.mutfak.json.XMLXsiTypeConverter;
+import com.mutfak.json.XMLParserConfiguration;
+import com.mutfak.json.JSONObject;
+import com.mutfak.json.XML;
 import static org.junit.Assert.assertEquals;
 import static org.junit.Assert.assertFalse;
 import static org.junit.Assert.assertNotEquals;

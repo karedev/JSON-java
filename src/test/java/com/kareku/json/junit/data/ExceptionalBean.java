@@ -1,7 +1,7 @@
 /**
  * 
  */
-package com.kareku.json.junit.data;
+package com.mutfak.json.junit.data;
 
 import java.io.Closeable;
 import java.io.IOException;

@@ -1,4 +1,4 @@
-package com.kareku.json.junit.data;
+package com.mutfak.json.junit.data;
 
 /**
  * An enum that contains getters and some internal fields

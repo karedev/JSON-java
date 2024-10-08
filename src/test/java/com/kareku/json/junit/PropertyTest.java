@@ -1,11 +1,11 @@
-package com.kareku.json.junit;
+package com.mutfak.json.junit;
 
 /*
 Public Domain.
 */
 
-import com.kareku.json.JSONObject;
-import com.kareku.json.Property;
+import com.mutfak.json.JSONObject;
+import com.mutfak.json.Property;
 import java.util.*;
 
 import static org.junit.Assert.*;

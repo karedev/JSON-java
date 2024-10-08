@@ -1,4 +1,4 @@
-package com.kareku.json;
+package com.mutfak.json;
 
 /**
  * Configuration object for the JSON parser. The configuration is immutable.

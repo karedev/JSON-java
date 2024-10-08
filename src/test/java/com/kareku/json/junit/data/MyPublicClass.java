@@ -1,4 +1,4 @@
-package com.kareku.json.junit.data;
+package com.mutfak.json.junit.data;
 
 /**
  * Need a class with some public data members for testing
