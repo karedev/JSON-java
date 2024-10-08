@@ -1,4 +1,4 @@
-package com.mutfak.json;
+package com.kareku.json;
 
 /*
 Public Domain.
@@ -29,8 +29,8 @@ import java.util.Set;
 import java.util.regex.Pattern;
 import java.util.stream.Stream;
 
-import static com.mutfak.json.NumberConversionUtil.potentialNumber;
-import static com.mutfak.json.NumberConversionUtil.stringToNumber;
+import static com.kareku.json.NumberConversionUtil.potentialNumber;
+import static com.kareku.json.NumberConversionUtil.stringToNumber;
 
 /**
  * A JSONObject is an unordered collection of name/value pairs. Its external

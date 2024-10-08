@@ -1,4 +1,4 @@
-package com.mutfak.json;
+package com.kareku.json;
 
 /*
 Public Domain.
@@ -10,8 +10,8 @@ import java.math.BigDecimal;
 import java.math.BigInteger;
 import java.util.Iterator;
 
-import static com.mutfak.json.NumberConversionUtil.potentialNumber;
-import static com.mutfak.json.NumberConversionUtil.stringToNumber;
+import static com.kareku.json.NumberConversionUtil.potentialNumber;
+import static com.kareku.json.NumberConversionUtil.stringToNumber;
 
 
 /**

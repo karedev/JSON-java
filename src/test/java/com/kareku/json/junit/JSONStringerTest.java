@@ -1,13 +1,13 @@
-package com.mutfak.json.junit;
+package com.kareku.json.junit;
 
 /*
 Public Domain.
 */
 
-import com.mutfak.json.JSONStringer;
-import com.mutfak.json.JSONArray;
-import com.mutfak.json.JSONException;
-import com.mutfak.json.JSONObject;
+import com.kareku.json.JSONStringer;
+import com.kareku.json.JSONArray;
+import com.kareku.json.JSONException;
+import com.kareku.json.JSONObject;
 import static org.junit.Assert.*;
 
 import java.math.BigDecimal;

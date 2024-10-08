@@ -1,4 +1,4 @@
-package com.mutfak.json.junit;
+package com.kareku.json.junit;
 
 /*
 Public Domain.
@@ -9,11 +9,11 @@ import com.jayway.jsonpath.JsonPath;
 import java.util.EnumSet;
 import java.util.List;
 import java.util.Map;
-import com.mutfak.json.JSONArray;
-import com.mutfak.json.JSONObject;
-import com.mutfak.json.junit.data.MyEnum;
-import com.mutfak.json.junit.data.MyEnumClass;
-import com.mutfak.json.junit.data.MyEnumField;
+import com.kareku.json.JSONArray;
+import com.kareku.json.JSONObject;
+import com.kareku.json.junit.data.MyEnum;
+import com.kareku.json.junit.data.MyEnumClass;
+import com.kareku.json.junit.data.MyEnumField;
 import static org.junit.Assert.assertEquals;
 import static org.junit.Assert.assertNull;
 import static org.junit.Assert.assertTrue;

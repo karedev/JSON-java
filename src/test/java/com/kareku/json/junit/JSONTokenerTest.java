@@ -1,4 +1,4 @@
-package com.mutfak.json.junit;
+package com.kareku.json.junit;
 
 /*
 Public Domain.
@@ -16,14 +16,14 @@ import java.io.InputStreamReader;
 import java.io.Reader;
 import java.io.StringReader;
 
-import com.mutfak.json.JSONArray;
-import com.mutfak.json.JSONException;
-import com.mutfak.json.JSONObject;
-import com.mutfak.json.JSONTokener;
+import com.kareku.json.JSONArray;
+import com.kareku.json.JSONException;
+import com.kareku.json.JSONObject;
+import com.kareku.json.JSONTokener;
 import org.junit.Test;
 
 /**
- * Test specific to the {@link com.mutfak.json.JSONTokener} class.
+ * Test specific to the {@link com.kareku.json.JSONTokener} class.
  * @author John Aylward
  *
  */

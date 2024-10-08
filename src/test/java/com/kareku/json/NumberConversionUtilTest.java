@@ -1,4 +1,4 @@
-package com.mutfak.json;
+package com.kareku.json;
 
 import org.junit.Test;
 

@@ -1,15 +1,15 @@
-package com.mutfak.json.junit;
+package com.kareku.json.junit;
 
 /*
 Public Domain.
 */
 
-import com.mutfak.json.JSONObject;
+import com.kareku.json.JSONObject;
 import static org.junit.Assert.*;
 
 import java.util.*;
 
-import com.mutfak.json.junit.data.MyLocaleBean;
+import com.kareku.json.junit.data.MyLocaleBean;
 import org.junit.*;
 
 /**

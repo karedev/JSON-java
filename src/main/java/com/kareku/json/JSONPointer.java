@@ -1,4 +1,4 @@
-package com.mutfak.json;
+package com.kareku.json;
 
 import java.io.UnsupportedEncodingException;
 import static java.lang.String.format;

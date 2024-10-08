@@ -1,6 +1,6 @@
-package com.mutfak.json.junit.data;
+package com.kareku.json.junit.data;
 
-import com.mutfak.json.JSONPropertyName;
+import com.kareku.json.JSONPropertyName;
 
 /**
  * Test bean for the {@link JSONPropertyName} annotation.

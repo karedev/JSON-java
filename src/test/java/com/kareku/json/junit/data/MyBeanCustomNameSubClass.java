@@ -1,13 +1,13 @@
 /**
  * 
  */
-package com.mutfak.json.junit.data;
+package com.kareku.json.junit.data;
 
-import com.mutfak.json.JSONPropertyIgnore;
-import com.mutfak.json.JSONPropertyName;
+import com.kareku.json.JSONPropertyIgnore;
+import com.kareku.json.JSONPropertyName;
 
 /**
- * Test bean to verify that the {@link com.mutfak.json.JSONPropertyName} annotation
+ * Test bean to verify that the {@link com.kareku.json.JSONPropertyName} annotation
  * is inherited.
  */
 public class MyBeanCustomNameSubClass extends MyBeanCustomName {

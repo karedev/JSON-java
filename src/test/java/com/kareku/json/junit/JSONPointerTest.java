@@ -1,4 +1,4 @@
-package com.mutfak.json.junit;
+package com.kareku.json.junit;
 
 /*
 Public Domain.
@@ -10,11 +10,11 @@ import static org.junit.Assert.fail;
 
 import java.io.InputStream;
 
-import com.mutfak.json.JSONArray;
-import com.mutfak.json.JSONObject;
-import com.mutfak.json.JSONPointer;
-import com.mutfak.json.JSONPointerException;
-import com.mutfak.json.JSONTokener;
+import com.kareku.json.JSONArray;
+import com.kareku.json.JSONObject;
+import com.kareku.json.JSONPointer;
+import com.kareku.json.JSONPointerException;
+import com.kareku.json.JSONTokener;
 import org.junit.Test;
 
 public class JSONPointerTest {

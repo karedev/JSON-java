@@ -1,4 +1,4 @@
-package com.mutfak.json.junit;
+package com.kareku.json.junit;
 
 /*
 Public Domain.
@@ -7,10 +7,10 @@ Public Domain.
 import static org.junit.Assert.*;
 import org.junit.Test;
 
-import com.mutfak.json.JSONException;
-import com.mutfak.json.JSONObject;
-import com.mutfak.json.JSONArray;
-import com.mutfak.json.CDL;
+import com.kareku.json.JSONException;
+import com.kareku.json.JSONObject;
+import com.kareku.json.JSONArray;
+import com.kareku.json.CDL;
 
 /**
  * Tests for CDL.java.

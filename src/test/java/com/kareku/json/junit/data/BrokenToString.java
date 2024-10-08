@@ -1,4 +1,4 @@
-package com.mutfak.json.junit.data;
+package com.kareku.json.junit.data;
 
 /**
  * test class for verifying write errors.

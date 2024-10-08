@@ -1,7 +1,7 @@
 /**
  * 
  */
-package com.mutfak.json.junit.data;
+package com.kareku.json.junit.data;
 
 import java.util.ArrayList;
 import java.util.Arrays;

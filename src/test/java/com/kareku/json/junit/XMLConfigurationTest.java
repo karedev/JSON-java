@@ -1,4 +1,4 @@
-package com.mutfak.json.junit;
+package com.kareku.json.junit;
 
 /*
 Public Domain.
@@ -13,11 +13,11 @@ import java.io.StringReader;
 import java.util.HashSet;
 import java.util.Set;
 
-import com.mutfak.json.JSONArray;
-import com.mutfak.json.JSONException;
-import com.mutfak.json.JSONObject;
-import com.mutfak.json.XML;
-import com.mutfak.json.XMLParserConfiguration;
+import com.kareku.json.JSONArray;
+import com.kareku.json.JSONException;
+import com.kareku.json.JSONObject;
+import com.kareku.json.XML;
+import com.kareku.json.XMLParserConfiguration;
 import org.junit.Rule;
 import org.junit.Test;
 import org.junit.rules.TemporaryFolder;

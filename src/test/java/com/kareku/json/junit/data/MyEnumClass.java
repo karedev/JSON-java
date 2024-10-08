@@ -1,4 +1,4 @@
-package com.mutfak.json.junit.data;
+package com.kareku.json.junit.data;
 
 /**
  * this is simply a class that contains some enum instances

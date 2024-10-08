@@ -1,4 +1,4 @@
-package com.mutfak.json;
+package com.kareku.json;
 
 import java.io.*;
 import java.nio.charset.Charset;

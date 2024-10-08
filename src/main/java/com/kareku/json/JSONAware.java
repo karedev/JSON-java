@@ -1,4 +1,4 @@
-package com.mutfak.json;
+package com.kareku.json;
 
 /**
  * Beans that support customized output of JSON text shall implement this interface.  

@@ -1,10 +1,10 @@
-package com.mutfak.json.junit;
+package com.kareku.json.junit;
 
 import java.math.BigDecimal;
 import java.math.BigInteger;
 import java.util.Arrays;
 import java.util.Collection;
-import com.mutfak.json.JSONObject;
+import com.kareku.json.JSONObject;
 import static org.junit.Assert.assertEquals;
 import static org.junit.Assert.assertTrue;
 import org.junit.Before;
