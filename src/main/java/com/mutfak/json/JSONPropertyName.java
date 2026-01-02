@@ -4,10 +4,11 @@ package com.mutfak.json;
 Public Domain.
 */
 
-import java.lang.annotation.Documented;
 import static java.lang.annotation.ElementType.METHOD;
-import java.lang.annotation.Retention;
 import static java.lang.annotation.RetentionPolicy.RUNTIME;
+
+import java.lang.annotation.Documented;
+import java.lang.annotation.Retention;
 import java.lang.annotation.Target;
 
 /**
@@ -20,8 +21,7 @@ import java.lang.annotation.Target;
 @Target({METHOD})
 public @interface JSONPropertyName {
     /**
-     * The name of the property
-     * 
+     * The value of the JSON property.
      * @return The name of the property as to be used in the JSON Object.
      */
     String value();

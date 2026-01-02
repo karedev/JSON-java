@@ -20,14 +20,24 @@ public class XMLParserConfiguration extends ParserConfiguration {
     /**
      * The default maximum nesting depth when parsing a XML document to JSON.
      */
-    public static final int DEFAULT_MAXIMUM_NESTING_DEPTH = 512; // We could override
+//    public static final int DEFAULT_MAXIMUM_NESTING_DEPTH = 512; // We could override
+
+    /**
+     * Allow user to control how numbers are parsed
+     */
+    private boolean keepNumberAsString;
+
+    /**
+     * Allow user to control how booleans are parsed
+     */
+    private boolean keepBooleanAsString;
 
     /** Original Configuration of the XML Parser. */
     public static final XMLParserConfiguration ORIGINAL
-        = new XMLParserConfiguration();
+            = new XMLParserConfiguration();
     /** Original configuration of the XML Parser except that values are kept as strings. */
     public static final XMLParserConfiguration KEEP_STRINGS
-        = new XMLParserConfiguration().withKeepStrings(true);
+            = new XMLParserConfiguration().withKeepStrings(true);
 
     /**
      * The name of the key in a JSON Object that indicates a CDATA section. Historically this has
@@ -142,7 +152,9 @@ public class XMLParserConfiguration extends ParserConfiguration {
      */
     @Deprecated
     public XMLParserConfiguration (final boolean keepStrings, final String cDataTagName, final boolean convertNilAttributeToNull) {
-        super(keepStrings, DEFAULT_MAXIMUM_NESTING_DEPTH);
+        super(false, DEFAULT_MAXIMUM_NESTING_DEPTH);
+        this.keepNumberAsString = keepStrings;
+        this.keepBooleanAsString = keepStrings;
         this.cDataTagName = cDataTagName;
         this.convertNilAttributeToNull = convertNilAttributeToNull;
     }
@@ -162,9 +174,11 @@ public class XMLParserConfiguration extends ParserConfiguration {
      * @param closeEmptyTag <code>boolean</code> to turn on explicit end tag for tag with empty value
      */
     private XMLParserConfiguration (final boolean keepStrings, final String cDataTagName,
-            final boolean convertNilAttributeToNull, final Map<String, XMLXsiTypeConverter<?>> xsiTypeMap, final Set<String> forceList,
-            final int maxNestingDepth, final boolean closeEmptyTag) {
-        super(keepStrings, maxNestingDepth);
+                                    final boolean convertNilAttributeToNull, final Map<String, XMLXsiTypeConverter<?>> xsiTypeMap, final Set<String> forceList,
+                                    final int maxNestingDepth, final boolean closeEmptyTag, final boolean keepNumberAsString, final boolean keepBooleanAsString) {
+        super(false, maxNestingDepth);
+        this.keepNumberAsString = keepNumberAsString;
+        this.keepBooleanAsString = keepBooleanAsString;
         this.cDataTagName = cDataTagName;
         this.convertNilAttributeToNull = convertNilAttributeToNull;
         this.xsiTypeMap = Collections.unmodifiableMap(xsiTypeMap);
@@ -189,7 +203,9 @@ public class XMLParserConfiguration extends ParserConfiguration {
                 this.xsiTypeMap,
                 this.forceList,
                 this.maxNestingDepth,
-                this.closeEmptyTag
+                this.closeEmptyTag,
+                this.keepNumberAsString,
+                this.keepBooleanAsString
         );
         config.shouldTrimWhiteSpace = this.shouldTrimWhiteSpace;
         return config;
@@ -207,7 +223,43 @@ public class XMLParserConfiguration extends ParserConfiguration {
     @SuppressWarnings("unchecked")
     @Override
     public XMLParserConfiguration withKeepStrings(final boolean newVal) {
-        return super.withKeepStrings(newVal);
+        XMLParserConfiguration newConfig = this.clone();
+        newConfig.keepStrings = newVal;
+        newConfig.keepNumberAsString = newVal;
+        newConfig.keepBooleanAsString = newVal;
+        return newConfig;
+    }
+
+    /**
+     * When parsing the XML into JSON, specifies if numbers should be kept as strings (<code>1</code>), or if
+     * they should try to be guessed into JSON values (numeric, boolean, string)
+     *
+     * @param newVal
+     *      new value to use for the <code>keepNumberAsString</code> configuration option.
+     *
+     * @return The existing configuration will not be modified. A new configuration is returned.
+     */
+    public XMLParserConfiguration withKeepNumberAsString(final boolean newVal) {
+        XMLParserConfiguration newConfig = this.clone();
+        newConfig.keepNumberAsString = newVal;
+        newConfig.keepStrings = newConfig.keepBooleanAsString && newConfig.keepNumberAsString;
+        return newConfig;
+    }
+
+    /**
+     * When parsing the XML into JSON, specifies if booleans should be kept as strings (<code>true</code>), or if
+     * they should try to be guessed into JSON values (numeric, boolean, string)
+     *
+     * @param newVal
+     *      new value to use for the <code>withKeepBooleanAsString</code> configuration option.
+     *
+     * @return The existing configuration will not be modified. A new configuration is returned.
+     */
+    public XMLParserConfiguration withKeepBooleanAsString(final boolean newVal) {
+        XMLParserConfiguration newConfig = this.clone();
+        newConfig.keepBooleanAsString = newVal;
+        newConfig.keepStrings = newConfig.keepBooleanAsString && newConfig.keepNumberAsString;
+        return newConfig;
     }
 
     /**
@@ -219,6 +271,26 @@ public class XMLParserConfiguration extends ParserConfiguration {
      */
     public String getcDataTagName() {
         return this.cDataTagName;
+    }
+
+    /**
+     * When parsing the XML into JSONML, specifies if numbers should be kept as strings (<code>true</code>), or if
+     * they should try to be guessed into JSON values (numeric, boolean, string).
+     *
+     * @return The <code>keepStrings</code> configuration value.
+     */
+    public boolean isKeepNumberAsString() {
+        return this.keepNumberAsString;
+    }
+
+    /**
+     * When parsing the XML into JSONML, specifies if booleans should be kept as strings (<code>true</code>), or if
+     * they should try to be guessed into JSON values (numeric, boolean, string).
+     *
+     * @return The <code>keepStrings</code> configuration value.
+     */
+    public boolean isKeepBooleanAsString() {
+        return this.keepBooleanAsString;
     }
 
     /**
@@ -353,19 +425,18 @@ public class XMLParserConfiguration extends ParserConfiguration {
     }
 
     /**
-     * Returns the close empty tag.
-     * 
-     * @return The tag
+     * Checks if the parser should automatically close empty XML tags.
+     *
+     * @return {@code true} if empty XML tags should be automatically closed, {@code false} otherwise.
      */
     public boolean isCloseEmptyTag() {
         return this.closeEmptyTag;
     }
-    
+
     /**
-     * Returns if white space should be
-     * trimmed.
-     * 
-     * @return The white space flag
+     * Checks if the parser should trim white spaces from XML content.
+     *
+     * @return {@code true} if white spaces should be trimmed, {@code false} otherwise.
      */
     public boolean shouldTrimWhiteSpace() {
         return this.shouldTrimWhiteSpace;

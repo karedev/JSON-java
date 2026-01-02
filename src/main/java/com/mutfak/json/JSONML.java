@@ -13,12 +13,16 @@ Public Domain.
  * @version 2016-01-30
  */
 public class JSONML {
+
     /**
-     * Default constructor
+     * Constructs a new JSONML object.
+     * @deprecated (Utility class cannot be instantiated)
      */
+    @Deprecated
     public JSONML() {
     }
-    
+
+
     /**
      * Parse XML values and store them in a JSONArray.
      * @param x       The XMLTokener containing the source string.
@@ -30,15 +34,15 @@ public class JSONML {
      * @throws JSONException if a parsing error occurs
      */
     private static Object parse(
-        XMLTokener x,
-        boolean    arrayForm,
-        JSONArray  ja,
-        boolean keepStrings,
-        int currentNestingDepth
+            XMLTokener x,
+            boolean    arrayForm,
+            JSONArray  ja,
+            boolean keepStrings,
+            int currentNestingDepth
     ) throws JSONException {
         return parse(x,arrayForm, ja,
-            keepStrings ? JSONMLParserConfiguration.KEEP_STRINGS : JSONMLParserConfiguration.ORIGINAL,
-            currentNestingDepth);
+                keepStrings ? JSONMLParserConfiguration.KEEP_STRINGS : JSONMLParserConfiguration.ORIGINAL,
+                currentNestingDepth);
     }
 
     /**
@@ -54,11 +58,11 @@ public class JSONML {
      * @throws JSONException if a parsing error occurs
      */
     private static Object parse(
-        XMLTokener x,
-        boolean    arrayForm,
-        JSONArray  ja,
-        JSONMLParserConfiguration config,
-        int currentNestingDepth
+            XMLTokener x,
+            boolean    arrayForm,
+            JSONArray  ja,
+            JSONMLParserConfiguration config,
+            int currentNestingDepth
     ) throws JSONException {
         String     attribute;
         char       c;
@@ -91,7 +95,7 @@ public class JSONML {
                         if (!(token instanceof String)) {
                             throw new JSONException(
                                     "Expected a closing name instead of '" +
-                                    token + "'.");
+                                            token + "'.");
                         }
                         if (x.nextToken() != XML.GT) {
                             throw x.syntaxError("Misshaped close tag");
@@ -110,7 +114,7 @@ public class JSONML {
                             }
                         } else if (c == '[') {
                             token = x.nextToken();
-                            if (token.equals("CDATA") && x.next() == '[') {
+                            if ("CDATA".equals(token) && x.next() == '[') {
                                 if (ja != null) {
                                     ja.put(x.nextCDATA());
                                 }
@@ -238,9 +242,21 @@ public class JSONML {
                 }
             } else {
                 if (ja != null) {
-                    ja.put(token instanceof String
-                        ? (config.isKeepStrings() ? XML.unescape((String)token) : XML.stringToValue((String)token))
-                        : token);
+                    Object value;
+
+                    if (token instanceof String) {
+                        String strToken = (String) token;
+                        if (config.isKeepStrings()) {
+                            value = XML.unescape(strToken);
+                        } else {
+                            value = XML.stringToValue(strToken);
+                        }
+                    } else {
+                        value = token;
+                    }
+
+                    ja.put(value);
+
                 }
             }
         }
@@ -448,7 +464,7 @@ public class JSONML {
      * @throws JSONException Thrown on error converting to a JSONObject
      */
     public static JSONObject toJSONObject(XMLTokener x) throws JSONException {
-           return (JSONObject)parse(x, false, null, false, 0);
+        return (JSONObject)parse(x, false, null, false, 0);
     }
 
 
@@ -468,7 +484,7 @@ public class JSONML {
      * @throws JSONException Thrown on error converting to a JSONObject
      */
     public static JSONObject toJSONObject(XMLTokener x, boolean keepStrings) throws JSONException {
-           return (JSONObject)parse(x, false, null, keepStrings, 0);
+        return (JSONObject)parse(x, false, null, keepStrings, 0);
     }
 
 

@@ -10,9 +10,12 @@ Public Domain.
  * @version 2015-12-09
  */
 public class CookieList {
+
     /**
-     * Default constructor
+     * Constructs a new CookieList object.
+     * @deprecated (Utility class cannot be instantiated)
      */
+    @Deprecated
     public CookieList() {
     }
 

@@ -1,7 +1,8 @@
 package com.mutfak.json;
 
-import java.io.UnsupportedEncodingException;
 import static java.lang.String.format;
+
+import java.io.UnsupportedEncodingException;
 import java.net.URLDecoder;
 import java.net.URLEncoder;
 import java.util.ArrayList;
@@ -15,18 +16,18 @@ Public Domain.
 /**
  * A JSON Pointer is a simple query language defined for JSON documents by
  * <a href="https://tools.ietf.org/html/rfc6901">RFC 6901</a>.
- * 
+ *
  * In a nutshell, JSONPointer allows the user to navigate into a JSON document
  * using strings, and retrieve targeted objects, like a simple form of XPATH.
  * Path segments are separated by the '/' char, which signifies the root of
- * the document when it appears as the first char of the string. Array 
+ * the document when it appears as the first char of the string. Array
  * elements are navigated using ordinals, counting from 0. JSONPointer strings
  * may be extended to any arbitrary number of segments. If the navigation
  * is successful, the matched item is returned. A matched item may be a
- * JSONObject, a JSONArray, or a JSON value. If the JSONPointer string building 
+ * JSONObject, a JSONArray, or a JSON value. If the JSONPointer string building
  * fails, an appropriate exception is thrown. If the navigation fails to find
- * a match, a JSONPointerException is thrown. 
- * 
+ * a match, a JSONPointerException is thrown.
+ *
  * @author JSON.org
  * @version 2016-05-14
  */
@@ -41,15 +42,15 @@ public class JSONPointer {
      */
     public static class Builder {
 
-        // Segments for the eventual JSONPointer string
-        private final List<String> refTokens = new ArrayList<String>();
-
         /**
-         * Default constructor
+         * Constructs a new Builder object.
          */
         public Builder() {
         }
-        
+
+        // Segments for the eventual JSONPointer string
+        private final List<String> refTokens = new ArrayList<String>();
+
         /**
          * Creates a {@code JSONPointer} instance using the tokens previously set using the
          * {@link #append(String)} method calls.
@@ -61,12 +62,12 @@ public class JSONPointer {
 
         /**
          * Adds an arbitrary token to the list of reference tokens. It can be any non-null value.
-         * 
+         *
          * Unlike in the case of JSON string or URI fragment representation of JSON pointers, the
          * argument of this method MUST NOT be escaped. If you want to query the property called
          * {@code "a~b"} then you should simply pass the {@code "a~b"} string as-is, there is no
          * need to escape it as {@code "a~0b"}.
-         * 
+         *
          * @param token the new token to be appended to the list
          * @return {@code this}
          * @throws NullPointerException if {@code token} is null
@@ -81,8 +82,8 @@ public class JSONPointer {
 
         /**
          * Adds an integer to the reference token list. Although not necessarily, mostly this token will
-         * denote an array index. 
-         * 
+         * denote an array index.
+         *
          * @param arrayIndex the array index to be added to the token list
          * @return {@code this}
          */
@@ -94,7 +95,7 @@ public class JSONPointer {
 
     /**
      * Static factory method for {@link Builder}. Example usage:
-     * 
+     *
      * <pre><code>
      * JSONPointer pointer = JSONPointer.builder()
      *       .append("obj")
@@ -103,7 +104,7 @@ public class JSONPointer {
      *       .append(0)
      *       .build();
      * </code></pre>
-     * 
+     *
      *  @return a builder instance which can be used to construct a {@code JSONPointer} instance by chained
      *  {@link Builder#append(String)} calls.
      */
@@ -118,7 +119,7 @@ public class JSONPointer {
      * Pre-parses and initializes a new {@code JSONPointer} instance. If you want to
      * evaluate the same JSON Pointer on different JSON documents then it is recommended
      * to keep the {@code JSONPointer} instances due to performance considerations.
-     * 
+     *
      * @param pointer the JSON String or URI Fragment representation of the JSON pointer.
      * @throws IllegalArgumentException if {@code pointer} is not a valid JSON pointer
      */
@@ -126,7 +127,7 @@ public class JSONPointer {
         if (pointer == null) {
             throw new NullPointerException("pointer cannot be null");
         }
-        if (pointer.isEmpty() || pointer.equals("#")) {
+        if (pointer.isEmpty() || "#".equals(pointer)) {
             this.refTokens = Collections.emptyList();
             return;
         }
@@ -169,9 +170,10 @@ public class JSONPointer {
     }
 
     /**
-     * The pointer of tokens
-     * 
-     * @param refTokens Token
+     * Constructs a new JSONPointer instance with the provided list of reference tokens.
+     *
+     * @param refTokens A list of strings representing the reference tokens for the JSON Pointer.
+     *                  Each token identifies a step in the path to the targeted value.
      */
     public JSONPointer(List<String> refTokens) {
         this.refTokens = new ArrayList<String>(refTokens);
@@ -188,8 +190,8 @@ public class JSONPointer {
      * Evaluates this JSON Pointer on the given {@code document}. The {@code document}
      * is usually a {@link JSONObject} or a {@link JSONArray} instance, but the empty
      * JSON Pointer ({@code ""}) can be evaluated on any JSON values and in such case the
-     * returned value will be {@code document} itself. 
-     * 
+     * returned value will be {@code document} itself.
+     *
      * @param document the JSON document which should be the subject of querying.
      * @return the result of the evaluation
      * @throws JSONPointerException if an error occurs during evaluation
@@ -229,10 +231,10 @@ public class JSONPointer {
                         Integer.valueOf(currentArr.length())));
             }
             try {
-				return currentArr.get(index);
-			} catch (JSONException e) {
-				throw new JSONPointerException("Error reading value at index position " + index, e);
-			}
+                return currentArr.get(index);
+            } catch (JSONException e) {
+                throw new JSONPointerException("Error reading value at index position " + index, e);
+            }
         } catch (NumberFormatException e) {
             throw new JSONPointerException(format("%s is not an array index", indexToken), e);
         }
@@ -244,7 +246,7 @@ public class JSONPointer {
      */
     @Override
     public String toString() {
-        StringBuilder rval = new StringBuilder("");
+        StringBuilder rval = new StringBuilder();
         for (String token: this.refTokens) {
             rval.append('/').append(escape(token));
         }
@@ -257,7 +259,7 @@ public class JSONPointer {
      * are ~, which maps to ~0, and /, which maps to ~1.
      * @param token the JSONPointer segment value to be escaped
      * @return the escaped value for the token
-     * 
+     *
      * @see <a href="https://tools.ietf.org/html/rfc6901#section-3">rfc6901 section 3</a>
      */
     private static String escape(String token) {
@@ -281,5 +283,4 @@ public class JSONPointer {
             throw new RuntimeException(e);
         }
     }
-    
 }

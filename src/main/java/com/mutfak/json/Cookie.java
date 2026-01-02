@@ -14,9 +14,12 @@ Public Domain.
  * @version 2015-12-09
  */
 public class Cookie {
+
     /**
-     * Default constructor
+     * Constructs a new Cookie object.
+     * @deprecated (Utility class cannot be instantiated)
      */
+    @Deprecated()
     public Cookie() {
     }
 
@@ -75,10 +78,10 @@ public class Cookie {
         final JSONObject     jo = new JSONObject();
         String         name;
         Object         value;
-        
-        
+
+
         JSONTokener x = new JSONTokener(string);
-        
+
         name = unescape(x.nextTo('=').trim());
         //per RFC6265, if the name is blank, the cookie should be ignored.
         if("".equals(name)) {
@@ -130,7 +133,7 @@ public class Cookie {
      */
     public static String toString(JSONObject jo) throws JSONException {
         StringBuilder sb = new StringBuilder();
-        
+
         String name = null;
         Object value = null;
         for(String key : jo.keySet()){
@@ -144,18 +147,18 @@ public class Cookie {
                 break;
             }
         }
-        
+
         if(name == null || "".equals(name.trim())) {
             throw new JSONException("Cookie does not have a name");
         }
         if(value == null) {
             value = "";
         }
-        
+
         sb.append(escape(name));
         sb.append("=");
         sb.append(escape((String)value));
-        
+
         for(String key : jo.keySet()){
             if("name".equalsIgnoreCase(key)
                     || "value".equalsIgnoreCase(key)) {
@@ -170,12 +173,12 @@ public class Cookie {
                 // don't emit false values
             } else {
                 sb.append(';')
-                    .append(escape(key))
-                    .append('=')
-                    .append(escape(value.toString()));
+                        .append(escape(key))
+                        .append('=')
+                        .append(escape(value.toString()));
             }
         }
-        
+
         return sb.toString();
     }
 

@@ -15,11 +15,11 @@ import java.util.Properties;
 public class Property {
 
     /**
-     * Default constructor
+     * Constructs a new Property object.
      */
     public Property() {
     }
-    
+
     /**
      * Converts a property file object into a JSONObject. The property file object is a table of name value pairs.
      * @param properties java.util.Properties
@@ -49,7 +49,7 @@ public class Property {
     public static Properties toProperties(JSONObject jo)  throws JSONException {
         Properties  properties = new Properties();
         if (jo != null) {
-        	// Don't use the new entrySet API to maintain Android support
+            // Don't use the new entrySet API to maintain Android support
             for (final String key : jo.keySet()) {
                 Object value = jo.opt(key);
                 if (!JSONObject.NULL.equals(value)) {

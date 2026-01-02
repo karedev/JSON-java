@@ -12,12 +12,12 @@ import java.util.Locale;
  * @version 2015-12-09
  */
 public class HTTP {
+
     /**
-     * Default constructor
+     * Constructs a new HTTP object.
      */
     public HTTP() {
     }
-    
 
     /** Carriage return/line feed. */
     public static final String CRLF = "\r\n";

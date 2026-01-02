@@ -16,10 +16,10 @@ public class JSONMLParserConfiguration extends ParserConfiguration {
 
     /** Original Configuration of the XML to JSONML Parser. */
     public static final JSONMLParserConfiguration ORIGINAL
-        = new JSONMLParserConfiguration();
+            = new JSONMLParserConfiguration();
     /** Original configuration of the XML to JSONML Parser except that values are kept as strings. */
     public static final JSONMLParserConfiguration KEEP_STRINGS
-        = new JSONMLParserConfiguration().withKeepStrings(true);
+            = new JSONMLParserConfiguration().withKeepStrings(true);
 
     /**
      * Default parser configuration. Does not keep strings (tries to implicitly convert values).
