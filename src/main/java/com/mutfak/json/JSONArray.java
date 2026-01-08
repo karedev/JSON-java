@@ -254,13 +254,13 @@ public class JSONArray<T> implements Iterable<T>, JSONAware {
         if (recursionDepth > jsonParserConfiguration.getMaxNestingDepth()) {
             throw new JSONException("JSONArray has reached recursion depth limit of " + jsonParserConfiguration.getMaxNestingDepth());
         }
+        this.elementType = objectType();
         if (collection == null) {
             this.myArrayList = new ArrayList<>();
         } else {
             this.myArrayList = new ArrayList<>(collection.size());
             this.addAll(collection, true, recursionDepth, jsonParserConfiguration);
         }
-        this.elementType = objectType();
     }
 
     /**

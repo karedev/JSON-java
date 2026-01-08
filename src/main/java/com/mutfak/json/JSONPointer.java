@@ -231,7 +231,7 @@ public class JSONPointer {
                         Integer.valueOf(currentArr.length())));
             }
             try {
-                return currentArr.get(index);
+                return currentArr.opt(index);
             } catch (JSONException e) {
                 throw new JSONPointerException("Error reading value at index position " + index, e);
             }

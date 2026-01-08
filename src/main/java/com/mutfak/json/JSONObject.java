@@ -1124,11 +1124,11 @@ public class JSONObject implements JSONAware {
      * @return A JSONArray containing the key strings, or null if the JSONObject
      *        is empty.
      */
-    public JSONArray names() {
+    public JSONArray<String> names() {
         if(this.map.isEmpty()) {
             return null;
         }
-        return new JSONArray(this.map.keySet());
+        return new JSONArray<>(this.map.keySet());
     }
 
     /**
