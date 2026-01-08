@@ -1,11 +1,6 @@
 package com.mutfak.json;
 
-/*
-Public Domain.
- */
-
 import java.io.IOException;
-import java.io.StringWriter;
 import java.io.Writer;
 import java.lang.reflect.Array;
 import java.math.BigDecimal;
@@ -72,10 +67,20 @@ public class JSONArray<T> implements Iterable<T>, JSONAware {
     private final ArrayList<T> myArrayList;
 
     /**
+     * The element type of the JSONArray elements.
+     */
+    private final Class<T> elementType;
+
+    @SuppressWarnings("unchecked")
+    private static <T> Class<T> objectType() {
+        return (Class<T>) Object.class;
+    }
+
+    /**
      * Construct an empty JSONArray.
      */
     public JSONArray() {
-        this.myArrayList = new ArrayList<>();
+        this(objectType());
     }
 
     /**
@@ -88,6 +93,13 @@ public class JSONArray<T> implements Iterable<T>, JSONAware {
      */
     public JSONArray(JSONTokener x) throws JSONException {
         this(x, x.getJsonParserConfiguration());
+    }
+
+    public JSONArray(Class<T> elementType) {
+        if (elementType == null)
+            throw new NullPointerException("elementType");
+        this.elementType = elementType;
+        this.myArrayList = new ArrayList<>();
     }
 
     /**
@@ -120,7 +132,7 @@ public class JSONArray<T> implements Iterable<T>, JSONAware {
                     this.myArrayList.add(null);
                 } else {
                     x.back();
-                    this.myArrayList.add((T)x.nextValue());
+                    this.myArrayList.add(checkedCast(x.nextValue()));
                 }
                 if (checkForSyntaxError(x, jsonParserConfiguration, isInitial)) return;
             }
@@ -248,6 +260,7 @@ public class JSONArray<T> implements Iterable<T>, JSONAware {
             this.myArrayList = new ArrayList<>(collection.size());
             this.addAll(collection, true, recursionDepth, jsonParserConfiguration);
         }
+        this.elementType = objectType();
     }
 
     /**
@@ -273,10 +286,12 @@ public class JSONArray<T> implements Iterable<T>, JSONAware {
     public JSONArray(JSONArray array) {
         if (array == null) {
             this.myArrayList = new ArrayList<>();
+            this.elementType = objectType();
         } else {
             // shallow copy directly the internal array lists as any wrapping
             // should have been done already in the original JSONArray
             this.myArrayList = new ArrayList<>(array.myArrayList);
+            this.elementType = objectType();
         }
     }
 
@@ -315,6 +330,7 @@ public class JSONArray<T> implements Iterable<T>, JSONAware {
                     "JSONArray initial capacity cannot be negative.");
         }
         this.myArrayList = new ArrayList<>(initialCapacity);
+        this.elementType = objectType();
     }
 
     @Override
@@ -1292,7 +1308,7 @@ public class JSONArray<T> implements Iterable<T>, JSONAware {
      */
     public JSONArray<T> put(Object value) {
         JSONObject.testValidity(value);
-        this.myArrayList.add((T)value);
+        this.myArrayList.add(checkedCast(value));
         return this;
     }
 
@@ -1870,17 +1886,17 @@ public class JSONArray<T> implements Iterable<T>, JSONAware {
      *
      * @return a java.util.List containing the elements of this array
      */
-    public List<Object> toList() {
-        List<Object> results = new ArrayList<Object>(this.myArrayList.size());
+    public List<T> toList() {
+        List<T> results = new ArrayList<>(this.myArrayList.size());
         for (Object element : this.myArrayList) {
             if (element == null || JSONObject.NULL.equals(element)) {
                 results.add(null);
             } else if (element instanceof JSONArray) {
-                results.add(((JSONArray) element).toList());
+                results.add(checkedCast(((JSONArray) element).toList()));
             } else if (element instanceof JSONObject) {
-                results.add(((JSONObject) element).toMap());
+                results.add(checkedCast(((JSONObject) element).toMap()));
             } else {
-                results.add(element);
+                results.add(checkedCast(element));
             }
         }
         return results;
@@ -2063,4 +2079,14 @@ public class JSONArray<T> implements Iterable<T>, JSONAware {
                 , cause);
     }
 
+    private T checkedCast(Object v) {
+        if (v == null || JSONObject.NULL.equals(v)) {
+            return null;
+        }
+        if (!elementType.isInstance(v)) {
+            throw new JSONException("Expected " + elementType.getName()
+                    + " but found " + v.getClass().getName());
+        }
+        return elementType.cast(v); // safe, no unchecked warning
+    }
 }

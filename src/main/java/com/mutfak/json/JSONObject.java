@@ -888,7 +888,7 @@ public class JSONObject implements JSONAware {
      * @throws JSONException
      *             if the key is not found or if the value is not a JSONArray.
      */
-    public JSONArray getJSONArray(String key) throws JSONException {
+    public <T> JSONArray<T> getJSONArray(String key) throws JSONException {
         Object object = this.get(key);
         if (object instanceof JSONArray) {
             return (JSONArray) object;
@@ -1229,8 +1229,8 @@ public class JSONObject implements JSONAware {
      *            A key string.
      * @return The truth.
      */
-    public boolean optBoolean(String key) {
-        return this.optBoolean(key, false);
+    public Boolean optBoolean(String key) {
+        return this.optBoolean(key, null);
     }
 
     /**
@@ -1244,7 +1244,7 @@ public class JSONObject implements JSONAware {
      *            The default.
      * @return The truth.
      */
-    public boolean optBoolean(String key, boolean defaultValue) {
+    public Boolean optBoolean(String key, Boolean defaultValue) {
         Object val = this.opt(key);
         if (NULL.equals(val)) {
             return defaultValue;
@@ -1440,8 +1440,8 @@ public class JSONObject implements JSONAware {
      *            A string which is the key.
      * @return An object which is the value.
      */
-    public double optDouble(String key) {
-        return this.optDouble(key, Double.NaN);
+    public Double optDouble(String key) {
+        return this.optDouble(key, null);
     }
 
     /**
@@ -1455,7 +1455,7 @@ public class JSONObject implements JSONAware {
      *            The default.
      * @return An object which is the value.
      */
-    public double optDouble(String key, double defaultValue) {
+    public Double optDouble(String key, Double defaultValue) {
         Number val = this.optNumber(key);
         if (val == null) {
             return defaultValue;
