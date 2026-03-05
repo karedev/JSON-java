@@ -1524,7 +1524,7 @@ public class JSONArray<T> implements Iterable<T>, JSONAware {
      *            A JSONArray.
      * @return this.
      */
-    public JSONArray putAll(JSONArray array) {
+    public JSONArray<T> putAll(JSONArray<T> array) {
         // directly copy the elements from the source array to this one
         // as all wrapping should have been done already in the source.
         this.myArrayList.addAll(array.myArrayList);

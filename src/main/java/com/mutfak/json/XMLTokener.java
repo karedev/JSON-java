@@ -23,7 +23,7 @@ public class XMLTokener extends JSONTokener {
     private XMLParserConfiguration configuration = XMLParserConfiguration.ORIGINAL;
 
     static {
-        entity = new java.util.HashMap<String, Character>(8);
+        entity = new java.util.HashMap<>(8);
         entity.put("amp",  XML.AMP);
         entity.put("apos", XML.APOS);
         entity.put("gt",   XML.GT);

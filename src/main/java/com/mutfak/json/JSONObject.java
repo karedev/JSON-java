@@ -1631,7 +1631,7 @@ public class JSONObject implements JSONAware {
      *            A key string.
      * @return A JSONArray which is the value.
      */
-    public JSONArray optJSONArray(String key) {
+    public <T> JSONArray<T> optJSONArray(String key) {
         return this.optJSONArray(key, null);
     }
 
@@ -1645,9 +1645,9 @@ public class JSONObject implements JSONAware {
      *            The default.
      * @return A JSONArray which is the value.
      */
-    public JSONArray optJSONArray(String key, JSONArray defaultValue) {
+    public <T> JSONArray<T> optJSONArray(String key, JSONArray<T> defaultValue) {
         Object object = this.opt(key);
-        return object instanceof JSONArray ? (JSONArray) object : defaultValue;
+        return object instanceof JSONArray ? (JSONArray<T>) object : defaultValue;
     }
 
     /**
